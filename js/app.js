@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeroShader();
   initScrollReveal();
   initNavScroll();
+  initHubDiagram();
 });
 
 /* -------------------------------------------------------
@@ -186,5 +187,42 @@ function initNavScroll() {
       });
       ticking = true;
     }
+  });
+}
+
+/* -------------------------------------------------------
+   HUB DIAGRAM — Attack surface toggle & node interactions
+------------------------------------------------------- */
+function initHubDiagram() {
+  const hub = document.getElementById('agent-hub');
+  const btn = document.getElementById('btn-show-attacks');
+  if (!hub || !btn) return;
+
+  let revealed = false;
+
+  btn.addEventListener('click', () => {
+    revealed = !revealed;
+    hub.classList.toggle('attacks-revealed', revealed);
+    btn.classList.toggle('active', revealed);
+    btn.querySelector('span').textContent = revealed
+      ? 'Hide Attack Surfaces'
+      : 'Reveal All Attack Surfaces';
+  });
+
+  // Mobile: toggle individual nodes on click/tap
+  hub.querySelectorAll('.hub-node').forEach((node) => {
+    node.addEventListener('click', (e) => {
+      // Only on touch/mobile — on desktop, hover handles it
+      if (window.innerWidth >= 1024) return;
+      e.stopPropagation();
+      node.classList.toggle('mobile-active');
+    });
+  });
+
+  // Close mobile-active nodes on outside click
+  document.addEventListener('click', () => {
+    hub.querySelectorAll('.hub-node.mobile-active').forEach((n) => {
+      n.classList.remove('mobile-active');
+    });
   });
 }

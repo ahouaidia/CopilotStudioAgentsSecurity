@@ -196,120 +196,206 @@
         </p>
       </div>
 
-      <!-- Architecture diagram placeholder -->
-      <div class="reveal mb-16">
-        <div class="anatomy-diagram rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-8 sm:p-12">
-          <div class="text-center text-white/30 text-sm font-medium uppercase tracking-widest mb-8">
-            Agent Architecture Overview
-          </div>
-          <!-- Visual component blocks -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <!-- Hub-Spoke Architecture Diagram -->
+      <div class="reveal mb-8">
+        <!-- Show All Attack Surfaces Button -->
+        <div class="flex justify-center mb-6">
+          <button id="btn-show-attacks" class="hub-attacks-btn" type="button">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span>Reveal All Attack Surfaces</span>
+          </button>
+        </div>
 
-            <!-- Core: Orchestrator -->
-            <div class="sm:col-span-3 flex justify-center mb-4">
-              <div class="anatomy-block anatomy-block-core rounded-xl border border-brand-gold/40 bg-brand-gold/10 px-8 py-5 text-center max-w-md w-full">
-                <div class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-1">Core</div>
-                <h3 class="font-heading text-lg text-white font-bold">Orchestrator</h3>
-                <p class="text-xs text-white/40 mt-1">LLM-powered reasoning engine that plans, coordinates actions, and generates responses</p>
-              </div>
+        <div class="agent-hub" id="agent-hub">
+
+          <!-- SVG Connection Lines (desktop only) -->
+          <svg class="hub-lines" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="grad-topics" gradientUnits="userSpaceOnUse" x1="500" y1="294" x2="500" y2="70">
+                <stop offset="0%" stop-color="#9D833E" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#16ABE0" stop-opacity="0.3"/>
+              </linearGradient>
+              <linearGradient id="grad-tools" gradientUnits="userSpaceOnUse" x1="500" y1="294" x2="830" y2="196">
+                <stop offset="0%" stop-color="#9D833E" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#D93D7A" stop-opacity="0.3"/>
+              </linearGradient>
+              <linearGradient id="grad-knowledge" gradientUnits="userSpaceOnUse" x1="500" y1="294" x2="740" y2="546">
+                <stop offset="0%" stop-color="#9D833E" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#00B0A3" stop-opacity="0.3"/>
+              </linearGradient>
+              <linearGradient id="grad-identity" gradientUnits="userSpaceOnUse" x1="500" y1="294" x2="260" y2="546">
+                <stop offset="0%" stop-color="#9D833E" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#7B5EA7" stop-opacity="0.3"/>
+              </linearGradient>
+              <linearGradient id="grad-llm" gradientUnits="userSpaceOnUse" x1="500" y1="294" x2="170" y2="196">
+                <stop offset="0%" stop-color="#9D833E" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#C069FF" stop-opacity="0.3"/>
+              </linearGradient>
+            </defs>
+            <!-- Animated data-flow particles along each line -->
+            <line class="hub-line" data-target="topics" x1="500" y1="294" x2="500" y2="70" stroke="url(#grad-topics)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line" data-target="tools" x1="500" y1="294" x2="830" y2="196" stroke="url(#grad-tools)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line" data-target="knowledge" x1="500" y1="294" x2="740" y2="546" stroke="url(#grad-knowledge)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line" data-target="identity" x1="500" y1="294" x2="260" y2="546" stroke="url(#grad-identity)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line" data-target="llm" x1="500" y1="294" x2="170" y2="196" stroke="url(#grad-llm)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          </svg>
+
+          <!-- ── Central: Orchestrator ── -->
+          <div class="hub-center">
+            <div class="hub-center-pulse"></div>
+            <div class="hub-center-ring"></div>
+            <div class="hub-center-content">
+              <svg class="w-8 h-8 text-brand-gold mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5M14.25 3.104c.251.023.501.05.75.082M19.8 14.5a2.25 2.25 0 010 3l-3.4 3.4a2.25 2.25 0 01-3 0L12 19.5l-1.4 1.4a2.25 2.25 0 01-3 0l-3.4-3.4a2.25 2.25 0 010-3"/>
+              </svg>
+              <div class="text-brand-gold text-[0.6rem] font-bold uppercase tracking-[0.2em] mb-1">Core</div>
+              <h3 class="font-heading text-base text-white font-bold leading-tight">Orchestrator</h3>
+              <p class="text-[0.6rem] text-white/35 mt-1 leading-snug max-w-[140px] mx-auto">LLM-powered reasoning engine that plans, coordinates, and responds</p>
             </div>
+          </div>
 
-            <!-- Topics / Instructions -->
-            <div class="anatomy-block rounded-xl border border-white/10 bg-white/[0.04] p-5 hover:border-brand-blue/40 transition-all duration-300">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-lg bg-brand-blue/15 flex items-center justify-center">
+          <!-- ── Node: Topics ── -->
+          <div class="hub-node hub-node-topics" data-component="topics">
+            <div class="hub-node-inner">
+              <div class="hub-node-front">
+                <div class="hub-node-icon bg-brand-blue/15">
                   <svg class="w-4 h-4 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
                 </div>
-                <h3 class="font-heading text-sm font-bold text-white">Topics &amp; Instructions</h3>
+                <h4 class="font-heading text-sm font-bold text-white mt-2">Topics</h4>
+                <p class="text-[0.65rem] text-white/40 mt-1 leading-snug">Modular conversation flows triggered by user phrases, built from step-by-step nodes.</p>
               </div>
-              <p class="text-xs text-white/50 leading-relaxed">
-                System prompts, conversation flows, and behavioral guardrails that define what the agent can and cannot do.
-              </p>
-            </div>
-
-            <!-- Knowledge Sources -->
-            <div class="anatomy-block rounded-xl border border-white/10 bg-white/[0.04] p-5 hover:border-brand-turquoise/40 transition-all duration-300">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-lg bg-brand-turquoise/15 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-brand-turquoise" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+              <div class="hub-node-attack">
+                <div class="hub-attack-label">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                   </svg>
+                  Attack Surface
                 </div>
-                <h3 class="font-heading text-sm font-bold text-white">Knowledge Sources</h3>
+                <ul class="hub-attack-list">
+                  <li>Prompt injection</li>
+                  <li>Unsafe orchestration</li>
+                  <li>Embedded secrets</li>
+                </ul>
               </div>
-              <p class="text-xs text-white/50 leading-relaxed">
-                SharePoint, Dataverse, websites, and uploaded files that the agent uses for grounded responses via RAG.
-              </p>
             </div>
+          </div>
 
-            <!-- Actions / Connectors -->
-            <div class="anatomy-block rounded-xl border border-white/10 bg-white/[0.04] p-5 hover:border-brand-pink/40 transition-all duration-300">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-lg bg-brand-pink/15 flex items-center justify-center">
+          <!-- ── Node: Tools ── -->
+          <div class="hub-node hub-node-tools" data-component="tools">
+            <div class="hub-node-inner">
+              <div class="hub-node-front">
+                <div class="hub-node-icon bg-brand-pink/15">
                   <svg class="w-4 h-4 text-brand-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                   </svg>
                 </div>
-                <h3 class="font-heading text-sm font-bold text-white">Actions &amp; Connectors</h3>
+                <h4 class="font-heading text-sm font-bold text-white mt-2">Tools</h4>
+                <p class="text-[0.65rem] text-white/40 mt-1 leading-snug">Connector actions, AI Builder models, and generative answers called at runtime.</p>
               </div>
-              <p class="text-xs text-white/50 leading-relaxed">
-                Power Automate flows, custom connectors, and API plugins that let the agent take real-world actions.
-              </p>
+              <div class="hub-node-attack">
+                <div class="hub-attack-label">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  Attack Surface
+                </div>
+                <ul class="hub-attack-list">
+                  <li>Privilege escalation</li>
+                  <li>Data exfiltration</li>
+                  <li>Governance bypass</li>
+                </ul>
+              </div>
             </div>
-
           </div>
 
-          <!-- Bottom row: Channels + Authentication + DLP -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+          <!-- ── Node: Knowledge Sources ── -->
+          <div class="hub-node hub-node-knowledge" data-component="knowledge">
+            <div class="hub-node-inner">
+              <div class="hub-node-front">
+                <div class="hub-node-icon bg-brand-turquoise/15">
+                  <svg class="w-4 h-4 text-brand-turquoise" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                  </svg>
+                </div>
+                <h4 class="font-heading text-sm font-bold text-white mt-2">Knowledge</h4>
+                <p class="text-[0.65rem] text-white/40 mt-1 leading-snug">Enterprise data from Power Platform, O365, and external sources for grounded answers.</p>
+              </div>
+              <div class="hub-node-attack">
+                <div class="hub-attack-label">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  Attack Surface
+                </div>
+                <ul class="hub-attack-list">
+                  <li>Sensitive info exposure</li>
+                  <li>Indirect prompt injection</li>
+                  <li>Data oversharing</li>
+                </ul>
+              </div>
+            </div>
+          </div>
 
-            <!-- Channels -->
-            <div class="anatomy-block rounded-xl border border-white/10 bg-white/[0.04] p-5 hover:border-brand-purple/40 transition-all duration-300">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-lg bg-brand-purple/15 flex items-center justify-center">
+          <!-- ── Node: Identity ── -->
+          <div class="hub-node hub-node-identity" data-component="identity">
+            <div class="hub-node-inner">
+              <div class="hub-node-front">
+                <div class="hub-node-icon bg-brand-purple/15">
                   <svg class="w-4 h-4 text-brand-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                   </svg>
                 </div>
-                <h3 class="font-heading text-sm font-bold text-white">Channels</h3>
+                <h4 class="font-heading text-sm font-bold text-white mt-2">Identity</h4>
+                <p class="text-[0.65rem] text-white/40 mt-1 leading-snug">Entra ID auth, OAuth, and delegated permissions governing agent and user access.</p>
               </div>
-              <p class="text-xs text-white/50 leading-relaxed">
-                Teams, websites, custom apps — the surfaces where users and other agents interact with the agent.
-              </p>
-            </div>
-
-            <!-- Authentication -->
-            <div class="anatomy-block rounded-xl border border-white/10 bg-white/[0.04] p-5 hover:border-brand-gold/40 transition-all duration-300">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-lg bg-brand-gold/15 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-brand-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              <div class="hub-node-attack">
+                <div class="hub-attack-label">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                   </svg>
+                  Attack Surface
                 </div>
-                <h3 class="font-heading text-sm font-bold text-white">Authentication</h3>
+                <ul class="hub-attack-list">
+                  <li>Token theft &amp; replay</li>
+                  <li>Over-privileged permissions</li>
+                  <li>Auth bypass</li>
+                </ul>
               </div>
-              <p class="text-xs text-white/50 leading-relaxed">
-                Entra ID integration, SSO, and OAuth — controls who can talk to the agent and what identity it uses to call APIs.
-              </p>
             </div>
-
-            <!-- Governance / DLP -->
-            <div class="anatomy-block rounded-xl border border-white/10 bg-white/[0.04] p-5 hover:border-brand-blue/40 transition-all duration-300">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-lg bg-brand-blue/15 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                  </svg>
-                </div>
-                <h3 class="font-heading text-sm font-bold text-white">Governance &amp; DLP</h3>
-              </div>
-              <p class="text-xs text-white/50 leading-relaxed">
-                Power Platform DLP policies, environment controls, and admin-level guardrails that constrain agent behavior.
-              </p>
-            </div>
-
           </div>
+
+          <!-- ── Node: LLM Model ── -->
+          <div class="hub-node hub-node-llm" data-component="llm">
+            <div class="hub-node-inner">
+              <div class="hub-node-front">
+                <div class="hub-node-icon bg-brand-gold/15">
+                  <svg class="w-4 h-4 text-brand-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                  </svg>
+                </div>
+                <h4 class="font-heading text-sm font-bold text-white mt-2">LLM Model</h4>
+                <p class="text-[0.65rem] text-white/40 mt-1 leading-snug">Language model powering reasoning, generation, safety filters, and content moderation.</p>
+              </div>
+              <div class="hub-node-attack">
+                <div class="hub-attack-label">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  Attack Surface
+                </div>
+                <ul class="hub-attack-list">
+                  <li>Jailbreak &amp; guardrail bypass</li>
+                  <li>Hallucination exploitation</li>
+                  <li>Model poisoning</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 

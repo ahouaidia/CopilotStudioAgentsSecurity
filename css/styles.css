@@ -452,28 +452,347 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--bg-dark);
 }
 
-.anatomy-diagram {
+/* =========================================================
+   HUB-SPOKE ARCHITECTURE DIAGRAM
+   ========================================================= */
+
+/* Container — holds the hub-spoke layout */
+.agent-hub {
   position: relative;
-  box-shadow: 0 0 80px rgba(157, 131, 62, 0.04);
+  width: 100%;
+  height: 680px;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
+  overflow: visible;
 }
 
-.anatomy-block {
-  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+/* SVG connection lines overlay */
+.hub-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.anatomy-block:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+.hub-line {
+  transition: stroke 0.4s ease, stroke-width 0.4s ease, opacity 0.4s ease;
+  animation: hubLineDash 12s linear infinite;
 }
 
-.anatomy-block-core {
-  box-shadow: 0 0 40px rgba(157, 131, 62, 0.08);
+@keyframes hubLineDash {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -40; }
 }
 
-.anatomy-block-core:hover {
-  box-shadow: 0 0 40px rgba(157, 131, 62, 0.15);
-  border-color: rgba(157, 131, 62, 0.6) !important;
+/* ── Central Orchestrator ── */
+.hub-center {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.hub-center-content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 16px;
+}
+
+.hub-center-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(157, 131, 62, 0.4);
+  background: rgba(157, 131, 62, 0.06);
+  backdrop-filter: blur(12px);
+  z-index: 2;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.hub-center-pulse {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(157, 131, 62, 0.15);
+  animation: hubCenterPulse 3s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes hubCenterPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%      { transform: scale(1.08); opacity: 0.8; }
+}
+
+/* ── Satellite Nodes ── */
+.hub-node {
+  position: absolute;
+  width: 190px;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+/* Pentagon positions — clockwise from top */
+.hub-node-topics    { left: 50%; top: 7%; }
+.hub-node-tools     { left: 85%; top: 30%; }
+.hub-node-knowledge { left: 74%; top: 80%; }
+.hub-node-identity  { left: 26%; top: 80%; }
+.hub-node-llm       { left: 15%; top: 30%; }
+
+.hub-node-inner {
+  position: relative;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  padding: 20px 16px;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.35s ease,
+              box-shadow 0.35s ease;
+}
+
+.hub-node:hover .hub-node-inner {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* Node icon */
+.hub-node-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Node Front ── */
+.hub-node-front {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.35s ease;
+}
+
+/* ── Attack Surface Overlay ── */
+.hub-node-attack {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(127, 29, 29, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 0.75rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.hub-attack-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fca5a5;
+  margin-bottom: 10px;
+}
+
+.hub-attack-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hub-attack-list li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.hub-attack-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f87171;
+}
+
+/* ── Hover & Active Attack States ── */
+
+/* Hover: show attack surface on individual node */
+.hub-node:hover .hub-node-attack {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.hub-node:hover .hub-node-front {
+  opacity: 0.15;
+}
+
+/* Hover: border turns red */
+.hub-node-topics:hover .hub-node-inner    { border-color: rgba(239, 68, 68, 0.5); }
+.hub-node-tools:hover .hub-node-inner     { border-color: rgba(239, 68, 68, 0.5); }
+.hub-node-knowledge:hover .hub-node-inner { border-color: rgba(239, 68, 68, 0.5); }
+.hub-node-identity:hover .hub-node-inner  { border-color: rgba(239, 68, 68, 0.5); }
+.hub-node-llm:hover .hub-node-inner       { border-color: rgba(239, 68, 68, 0.5); }
+
+/* Hover: connection line turns red (using :has) */
+.agent-hub:has(.hub-node-topics:hover) .hub-line[data-target="topics"],
+.agent-hub:has(.hub-node-tools:hover) .hub-line[data-target="tools"],
+.agent-hub:has(.hub-node-knowledge:hover) .hub-line[data-target="knowledge"],
+.agent-hub:has(.hub-node-identity:hover) .hub-line[data-target="identity"],
+.agent-hub:has(.hub-node-llm:hover) .hub-line[data-target="llm"] {
+  stroke: #ef4444 !important;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.4));
+}
+
+/* Hover on any node: center ring turns red */
+.agent-hub:has(.hub-node:hover) .hub-center-ring {
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+}
+
+/* ── "Show All" Attacks Revealed State ── */
+.agent-hub.attacks-revealed .hub-node-attack {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.agent-hub.attacks-revealed .hub-node-front {
+  opacity: 0.15;
+}
+
+.agent-hub.attacks-revealed .hub-node-inner {
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
+}
+
+.agent-hub.attacks-revealed .hub-line {
+  stroke: #ef4444 !important;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.3));
+}
+
+.agent-hub.attacks-revealed .hub-center-ring {
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.12);
+}
+
+.agent-hub.attacks-revealed .hub-center-pulse {
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ── Show All Attack Surfaces Button ── */
+.hub-attacks-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hub-attacks-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+}
+
+.hub-attacks-btn.active {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fecaca;
+}
+
+/* ── Mobile / Tablet fallback ── */
+@media (max-width: 1023px) {
+  .agent-hub {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 16px;
+  }
+
+  .hub-lines { display: none; }
+
+  .hub-center {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin-bottom: 8px;
+  }
+
+  .hub-node {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    transform: none;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  /* Mobile tap-to-reveal */
+  .hub-node.mobile-active .hub-node-attack {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .hub-node.mobile-active .hub-node-front {
+    opacity: 0.15;
+  }
+
+  .hub-node.mobile-active .hub-node-inner {
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+}
+
+/* ── Node-specific subtle border accents (non-hover) ── */
+.hub-node-topics .hub-node-inner    { border-color: rgba(22, 171, 224, 0.18); }
+.hub-node-tools .hub-node-inner     { border-color: rgba(217, 61, 122, 0.18); }
+.hub-node-knowledge .hub-node-inner { border-color: rgba(0, 176, 163, 0.18); }
+.hub-node-identity .hub-node-inner  { border-color: rgba(123, 94, 167, 0.18); }
+.hub-node-llm .hub-node-inner       { border-color: rgba(157, 131, 62, 0.18); }
 
 /* ----- Scroll Reveal Animations ----- */
 .reveal {
