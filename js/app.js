@@ -81,30 +81,25 @@ function initHeroShader() {
       uv = 2.0 * uv - 1.0;
       uv.x *= iResolution.x / iResolution.y;
 
-      // Two crossing energy beams
-      vec2 uv1 = uv + 2.0 * fbm(uv * 1.5 + 0.5 * iTime) - 1.0;
-      vec2 uv2 = uv * rot(0.8) + 2.0 * fbm(uv * 1.2 - 0.4 * iTime + 3.0) - 1.0;
+      // Soft flowing nebula — visible but not stormy
+      float t = iTime * 0.18;
+      float n1 = fbm(uv * 0.9 + t);
+      float n2 = fbm(uv * 0.7 - t * 0.6 + 5.0);
+      float n3 = fbm(uv * 1.1 + vec2(t * 0.4, -t * 0.3) + 10.0);
 
-      float d1 = abs(uv1.x);
-      float d2 = abs(uv2.x);
+      // Visible but soft color channels
+      vec3 purple = hsv(0.78, 0.55, 0.35) * n1;
+      vec3 cyan   = hsv(0.55, 0.45, 0.22) * n2;
+      vec3 gold   = hsv(0.12, 0.45, 0.14) * n3;
 
-      // Purple beam (hue ~270)
-      vec3 col1 = hsv(0.78, 0.7, 0.8) * pow(0.025 / d1, 1.2);
-      // Cyan/blue beam (hue ~200)
-      vec3 col2 = hsv(0.55, 0.6, 0.7) * pow(0.018 / d2, 1.1);
+      vec3 col = purple + cyan + gold;
 
-      // Subtle gold ambient
-      vec3 ambient = hsv(0.12, 0.5, 0.08) * fbm(uv * 0.8 + iTime * 0.1);
-
-      vec3 col = col1 + col2 + ambient;
-
-      // Vignette
-      float vig = 1.0 - 0.4 * length(uv * 0.6);
-      col *= vig;
+      // Vignette — fade edges to black
+      float vig = 1.0 - 0.4 * length(uv * 0.65);
+      col *= max(vig, 0.0);
 
       // Tone map
       col = col / (1.0 + col);
-      col = pow(col, vec3(0.9));
 
       gl_FragColor = vec4(col, 1.0);
     }

@@ -153,8 +153,8 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(rgba(192, 105, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(192, 105, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(192, 105, 255, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192, 105, 255, 0.10) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: circuitGridDrift 25s linear infinite;
 }
@@ -182,19 +182,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-circuit-line-1 {
   top: 25%;
-  background: linear-gradient(90deg, transparent 0%, rgba(192, 105, 255, 0.2) 20%, rgba(22, 171, 224, 0.15) 50%, rgba(192, 105, 255, 0.2) 80%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(192, 105, 255, 0.4) 20%, rgba(22, 171, 224, 0.3) 50%, rgba(192, 105, 255, 0.4) 80%, transparent 100%);
 }
 
 .hero-circuit-line-2 {
   top: 55%;
-  background: linear-gradient(90deg, transparent 0%, rgba(22, 171, 224, 0.15) 30%, rgba(157, 131, 62, 0.1) 60%, rgba(22, 171, 224, 0.15) 80%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(22, 171, 224, 0.3) 30%, rgba(157, 131, 62, 0.25) 60%, rgba(22, 171, 224, 0.3) 80%, transparent 100%);
   animation-direction: reverse;
   animation-delay: 2s;
 }
 
 .hero-circuit-line-3 {
   top: 80%;
-  background: linear-gradient(90deg, transparent 0%, rgba(157, 131, 62, 0.12) 25%, rgba(192, 105, 255, 0.1) 55%, rgba(157, 131, 62, 0.12) 85%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(157, 131, 62, 0.3) 25%, rgba(192, 105, 255, 0.25) 55%, rgba(157, 131, 62, 0.3) 85%, transparent 100%);
   animation-delay: 4s;
 }
 
