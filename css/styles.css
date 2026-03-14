@@ -146,57 +146,63 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
 }
 
-/* Ambient glow orbs */
-.hero-glow {
+/* --- Subtle AI Circuit Grid --- */
+.hero-circuit-grid {
   position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
+  inset: 0;
   z-index: 1;
-  filter: blur(120px);
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(192, 105, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192, 105, 255, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: circuitGridDrift 25s linear infinite;
 }
 
-.hero-glow-purple {
-  width: 600px;
-  height: 600px;
-  top: -200px;
-  right: -100px;
-  background: rgba(123, 94, 167, 0.15);
-  animation: glowPulse 8s ease-in-out infinite alternate;
+@keyframes circuitGridDrift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 60px 60px; }
 }
 
-.hero-glow-blue {
-  width: 500px;
-  height: 500px;
-  bottom: -150px;
-  left: -100px;
-  background: rgba(22, 171, 224, 0.1);
-  animation: glowPulse 10s ease-in-out infinite alternate-reverse;
+/* Sweeping light lines across the grid */
+.hero-circuit-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-.hero-glow-gold {
-  width: 400px;
-  height: 400px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(157, 131, 62, 0.06);
-  animation: glowPulse 6s ease-in-out infinite alternate;
+.hero-circuit-line {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  animation: circuitLineSweep 6s linear infinite;
 }
 
-@keyframes glowPulse {
-  0%   { opacity: 0.4; transform: scale(1);   }
-  50%  { opacity: 0.7; transform: scale(1.15); }
-  100% { opacity: 0.5; transform: scale(1.05); }
+.hero-circuit-line-1 {
+  top: 25%;
+  background: linear-gradient(90deg, transparent 0%, rgba(192, 105, 255, 0.2) 20%, rgba(22, 171, 224, 0.15) 50%, rgba(192, 105, 255, 0.2) 80%, transparent 100%);
 }
 
-.hero-glow-gold {
-  animation-name: glowPulseCenter;
+.hero-circuit-line-2 {
+  top: 55%;
+  background: linear-gradient(90deg, transparent 0%, rgba(22, 171, 224, 0.15) 30%, rgba(157, 131, 62, 0.1) 60%, rgba(22, 171, 224, 0.15) 80%, transparent 100%);
+  animation-direction: reverse;
+  animation-delay: 2s;
 }
 
-@keyframes glowPulseCenter {
-  0%   { opacity: 0.3; transform: translate(-50%, -50%) scale(1);   }
-  50%  { opacity: 0.5; transform: translate(-50%, -50%) scale(1.2); }
-  100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.05);}
+.hero-circuit-line-3 {
+  top: 80%;
+  background: linear-gradient(90deg, transparent 0%, rgba(157, 131, 62, 0.12) 25%, rgba(192, 105, 255, 0.1) 55%, rgba(157, 131, 62, 0.12) 85%, transparent 100%);
+  animation-delay: 4s;
+}
+
+@keyframes circuitLineSweep {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
 }
 
 /* Dot grid on dark bg */
