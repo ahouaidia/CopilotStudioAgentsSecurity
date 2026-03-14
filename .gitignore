@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Reference project (cloned for design reference only)
+_reference/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+*.swp
+*.swo
