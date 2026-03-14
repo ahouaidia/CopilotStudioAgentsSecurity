@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
   initNavScroll();
   initHubDiagram();
+  initHubParticles();
 });
 
 /* -------------------------------------------------------
@@ -225,4 +226,212 @@ function initHubDiagram() {
       n.classList.remove('mobile-active');
     });
   });
+}
+
+/* -------------------------------------------------------
+   HUB PARTICLES — Connected network animation background
+   Ported from Oversharing-Public hero particles
+------------------------------------------------------- */
+function initHubParticles() {
+  const container = document.getElementById('hub-particles');
+  if (!container) return;
+
+  const canvas = document.createElement('canvas');
+  container.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const COLORS = {
+    gold:      { r: 130, g: 108, b: 46 },
+    blue:      { r: 18,  g: 140, b: 184 },
+    turquoise: { r: 0,   g: 144, b: 134 },
+    pink:      { r: 178, g: 50,  b: 100 },
+  };
+
+  const NODE_COUNT = 45;
+  const CONNECTION_DIST = 160;
+  const PACKET_SPEED = 0.6;
+  const EDGE_MARGIN = 50;
+
+  let width, height, dpr;
+  let nodes = [];
+  let packets = [];
+  let animationId;
+  let time = 0;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = container.offsetWidth;
+    height = container.offsetHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function edgeAlpha(x, y) {
+    let a = 1;
+    if (x < EDGE_MARGIN) a *= x / EDGE_MARGIN;
+    else if (x > width - EDGE_MARGIN) a *= (width - x) / EDGE_MARGIN;
+    if (y < EDGE_MARGIN) a *= y / EDGE_MARGIN;
+    else if (y > height - EDGE_MARGIN) a *= (height - y) / EDGE_MARGIN;
+    return Math.max(0, a);
+  }
+
+  function createNode() {
+    const palette = [COLORS.gold, COLORS.blue, COLORS.turquoise];
+    const color = palette[Math.floor(Math.random() * palette.length)];
+    const isSecure = Math.random() < 0.12;
+    return {
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.2,
+      vy: (Math.random() - 0.5) * 0.2,
+      baseSize: isSecure ? 3 : (Math.random() * 1.6 + 0.8),
+      color: color,
+      isSecure: isSecure,
+      pulse: Math.random() * Math.PI * 2,
+    };
+  }
+
+  function createPacket(fromNode, toNode) {
+    return {
+      from: fromNode,
+      to: toNode,
+      progress: 0,
+      speed: PACKET_SPEED + Math.random() * 0.3,
+      color: COLORS.blue,
+    };
+  }
+
+  function drawHex(cx, cy, r, alpha, c) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i - Math.PI / 6;
+      const hx = cx + r * Math.cos(angle);
+      const hy = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha * 0.6})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha * 0.1})`;
+    ctx.fill();
+  }
+
+  function drawNode(node) {
+    const a = edgeAlpha(node.x, node.y);
+    if (a <= 0) return;
+    const pulseScale = 1 + 0.15 * Math.sin(time * 0.02 + node.pulse);
+    const size = node.baseSize * pulseScale;
+    const c = node.color;
+
+    if (node.isSecure) {
+      drawHex(node.x, node.y, size * 2, a, c);
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, size * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${a * 0.7})`;
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${a * 0.45})`;
+      ctx.fill();
+    }
+  }
+
+  function drawConnections() {
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONNECTION_DIST) {
+          const strength = 1 - dist / CONNECTION_DIST;
+          const a = Math.min(edgeAlpha(nodes[i].x, nodes[i].y), edgeAlpha(nodes[j].x, nodes[j].y)) * strength;
+          if (a < 0.01) continue;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${COLORS.gold.r}, ${COLORS.gold.g}, ${COLORS.gold.b}, ${a * 0.2})`;
+          ctx.lineWidth = 0.7;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function spawnPackets() {
+    if (Math.random() > 0.025 || packets.length > 15) return;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const a = nodes[Math.floor(Math.random() * nodes.length)];
+      const b = nodes[Math.floor(Math.random() * nodes.length)];
+      if (a === b) continue;
+      const dx = a.x - b.x, dy = a.y - b.y;
+      if (Math.sqrt(dx * dx + dy * dy) < CONNECTION_DIST) {
+        packets.push(createPacket(a, b));
+        break;
+      }
+    }
+  }
+
+  function updateAndDrawPackets() {
+    for (let i = packets.length - 1; i >= 0; i--) {
+      const p = packets[i];
+      p.progress += p.speed * 0.015;
+      if (p.progress >= 1) { packets.splice(i, 1); continue; }
+      const x = p.from.x + (p.to.x - p.from.x) * p.progress;
+      const y = p.from.y + (p.to.y - p.from.y) * p.progress;
+      const a = edgeAlpha(x, y);
+      if (a <= 0) continue;
+      const pa = a * (1 - Math.abs(p.progress - 0.5) * 0.6);
+      ctx.beginPath();
+      ctx.arc(x, y, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${COLORS.blue.r}, ${COLORS.blue.g}, ${COLORS.blue.b}, ${pa * 0.8})`;
+      ctx.fill();
+    }
+  }
+
+  function updateNodes() {
+    for (const node of nodes) {
+      node.vx *= 0.985;
+      node.vy *= 0.985;
+      node.x += node.vx;
+      node.y += node.vy;
+      if (node.x < -20) node.x = width + 20;
+      else if (node.x > width + 20) node.x = -20;
+      if (node.y < -20) node.y = height + 20;
+      else if (node.y > height + 20) node.y = -20;
+    }
+  }
+
+  function animate() {
+    time++;
+    ctx.clearRect(0, 0, width, height);
+    updateNodes();
+    drawConnections();
+    for (const node of nodes) drawNode(node);
+    spawnPackets();
+    updateAndDrawPackets();
+    animationId = requestAnimationFrame(animate);
+  }
+
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, createNode);
+    packets = [];
+    animate();
+  }
+
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      cancelAnimationFrame(animationId);
+      init();
+    }, 200);
+  });
+
+  init();
 }
