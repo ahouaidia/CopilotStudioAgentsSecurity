@@ -210,11 +210,38 @@
               <h3 class="hub-header-title">Copilot Studio Agent Anatomy</h3>
             </div>
             <div class="hub-header-right">
-              <button id="btn-show-attacks" class="hub-attacks-btn" type="button">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <span>Reveal All Attack Surfaces</span>
+              <!-- Stat counters -->
+              <div class="hub-stats" id="hub-stats">
+                <div class="hub-stat">
+                  <span class="hub-stat-num" data-target="6">0</span>
+                  <span class="hub-stat-label">Components</span>
+                </div>
+                <div class="hub-stat-divider"></div>
+                <div class="hub-stat">
+                  <span class="hub-stat-num" data-target="15">0</span>
+                  <span class="hub-stat-label">Attack Vectors</span>
+                </div>
+                <div class="hub-stat-divider"></div>
+                <div class="hub-stat">
+                  <span class="hub-stat-num hub-stat-critical" data-target="5">0</span>
+                  <span class="hub-stat-label">Critical</span>
+                </div>
+              </div>
+              <!-- Segmented lens toggle -->
+              <div class="hub-lens-toggle" id="hub-lens-toggle">
+                <button class="hub-lens-btn active" data-mode="architecture" type="button">
+                  <i data-lucide="layout-grid" class="w-3.5 h-3.5" stroke-width="2"></i>
+                  Architecture
+                </button>
+                <button class="hub-lens-btn" data-mode="threat" type="button">
+                  <i data-lucide="shield-alert" class="w-3.5 h-3.5" stroke-width="2"></i>
+                  Threat View
+                </button>
+              </div>
+              <!-- Simulate Attack button -->
+              <button id="btn-simulate-attack" class="hub-simulate-btn" type="button">
+                <i data-lucide="zap" class="w-3.5 h-3.5" stroke-width="2.5"></i>
+                <span>Simulate Attack</span>
               </button>
             </div>
           </div>
@@ -235,35 +262,40 @@
           <div class="agent-hub" id="agent-hub">
 
           <!-- SVG Connection Lines (desktop only) -->
-          <svg class="hub-lines" viewBox="0 0 1000 720" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="hub-lines" viewBox="0 0 1000 850" preserveAspectRatio="none" aria-hidden="true">
             <defs>
-              <linearGradient id="grad-topics" gradientUnits="userSpaceOnUse" x1="500" y1="317" x2="500" y2="72">
+              <linearGradient id="grad-topics" gradientUnits="userSpaceOnUse" x1="500" y1="425" x2="500" y2="145">
                 <stop offset="0%" stop-color="#9D833E" stop-opacity="0.6"/>
                 <stop offset="100%" stop-color="#16ABE0" stop-opacity="0.4"/>
               </linearGradient>
-              <linearGradient id="grad-tools" gradientUnits="userSpaceOnUse" x1="500" y1="317" x2="850" y2="230">
+              <linearGradient id="grad-tools" gradientUnits="userSpaceOnUse" x1="500" y1="425" x2="766" y2="338">
                 <stop offset="0%" stop-color="#9D833E" stop-opacity="0.6"/>
                 <stop offset="100%" stop-color="#D93D7A" stop-opacity="0.4"/>
               </linearGradient>
-              <linearGradient id="grad-knowledge" gradientUnits="userSpaceOnUse" x1="500" y1="317" x2="740" y2="590">
+              <linearGradient id="grad-knowledge" gradientUnits="userSpaceOnUse" x1="500" y1="425" x2="665" y2="655">
                 <stop offset="0%" stop-color="#9D833E" stop-opacity="0.6"/>
                 <stop offset="100%" stop-color="#00B0A3" stop-opacity="0.4"/>
               </linearGradient>
-              <linearGradient id="grad-identity" gradientUnits="userSpaceOnUse" x1="500" y1="317" x2="260" y2="590">
+              <linearGradient id="grad-identity" gradientUnits="userSpaceOnUse" x1="500" y1="425" x2="335" y2="655">
                 <stop offset="0%" stop-color="#9D833E" stop-opacity="0.6"/>
                 <stop offset="100%" stop-color="#7B5EA7" stop-opacity="0.4"/>
               </linearGradient>
-              <linearGradient id="grad-llm" gradientUnits="userSpaceOnUse" x1="500" y1="317" x2="150" y2="230">
+              <linearGradient id="grad-llm" gradientUnits="userSpaceOnUse" x1="500" y1="425" x2="234" y2="338">
                 <stop offset="0%" stop-color="#9D833E" stop-opacity="0.6"/>
                 <stop offset="100%" stop-color="#C069FF" stop-opacity="0.4"/>
               </linearGradient>
             </defs>
             <!-- Animated data-flow particles along each line -->
-            <line class="hub-line" data-target="topics" x1="500" y1="317" x2="500" y2="72" stroke="url(#grad-topics)" stroke-width="1.5" stroke-dasharray="6 4"/>
-            <line class="hub-line" data-target="tools" x1="500" y1="317" x2="850" y2="230" stroke="url(#grad-tools)" stroke-width="1.5" stroke-dasharray="6 4"/>
-            <line class="hub-line" data-target="knowledge" x1="500" y1="317" x2="740" y2="590" stroke="url(#grad-knowledge)" stroke-width="1.5" stroke-dasharray="6 4"/>
-            <line class="hub-line" data-target="identity" x1="500" y1="317" x2="260" y2="590" stroke="url(#grad-identity)" stroke-width="1.5" stroke-dasharray="6 4"/>
-            <line class="hub-line" data-target="llm" x1="500" y1="317" x2="150" y2="230" stroke="url(#grad-llm)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line" data-target="topics" x1="500" y1="425" x2="500" y2="145" stroke="url(#grad-topics)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line-hit" data-target="topics" x1="500" y1="425" x2="500" y2="145" stroke="transparent" stroke-width="24" data-tooltip="Routes user intents to conversation flows&#10;Risk: prompt injection in trigger phrases"/>
+            <line class="hub-line" data-target="tools" x1="500" y1="425" x2="766" y2="338" stroke="url(#grad-tools)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line-hit" data-target="tools" x1="500" y1="425" x2="766" y2="338" stroke="transparent" stroke-width="24" data-tooltip="Invokes connector actions &amp; APIs&#10;Risk: excessive agency, privilege escalation"/>
+            <line class="hub-line" data-target="knowledge" x1="500" y1="425" x2="665" y2="655" stroke="url(#grad-knowledge)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line-hit" data-target="knowledge" x1="500" y1="425" x2="665" y2="655" stroke="transparent" stroke-width="24" data-tooltip="Queries enterprise data sources&#10;Risk: indirect injection in returned context"/>
+            <line class="hub-line" data-target="identity" x1="500" y1="425" x2="335" y2="655" stroke="url(#grad-identity)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line-hit" data-target="identity" x1="500" y1="425" x2="335" y2="655" stroke="transparent" stroke-width="24" data-tooltip="Validates auth context &amp; permissions&#10;Risk: token replay, permission confusion"/>
+            <line class="hub-line" data-target="llm" x1="500" y1="425" x2="234" y2="338" stroke="url(#grad-llm)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <line class="hub-line-hit" data-target="llm" x1="500" y1="425" x2="234" y2="338" stroke="transparent" stroke-width="24" data-tooltip="Sends prompts, receives completions&#10;Risk: jailbreak, system prompt leakage"/>
           </svg>
 
           <!-- ── Central: Orchestrator ── -->
@@ -294,9 +326,9 @@
                   Attack Surface
                 </div>
                 <ul class="hub-attack-list">
-                  <li>Prompt injection</li>
-                  <li>Unsafe orchestration</li>
-                  <li>Embedded secrets</li>
+                  <li data-severity="critical" data-owasp="LLM01">Prompt injection</li>
+                  <li data-severity="high" data-owasp="LLM06">Unsafe orchestration</li>
+                  <li data-severity="medium" data-owasp="LLM07">System prompt leakage</li>
                 </ul>
               </div>
             </div>
@@ -318,9 +350,9 @@
                   Attack Surface
                 </div>
                 <ul class="hub-attack-list">
-                  <li>Privilege escalation</li>
-                  <li>Data exfiltration</li>
-                  <li>Governance bypass</li>
+                  <li data-severity="high" data-owasp="LLM06">Privilege escalation</li>
+                  <li data-severity="high" data-owasp="LLM02">Data exfiltration</li>
+                  <li data-severity="medium">Governance bypass</li>
                 </ul>
               </div>
             </div>
@@ -342,9 +374,9 @@
                   Attack Surface
                 </div>
                 <ul class="hub-attack-list">
-                  <li>Sensitive info exposure</li>
-                  <li>Indirect prompt injection</li>
-                  <li>Data oversharing</li>
+                  <li data-severity="critical" data-owasp="LLM02">Sensitive info exposure</li>
+                  <li data-severity="critical" data-owasp="LLM01">Indirect prompt injection</li>
+                  <li data-severity="high">Data oversharing</li>
                 </ul>
               </div>
             </div>
@@ -366,9 +398,9 @@
                   Attack Surface
                 </div>
                 <ul class="hub-attack-list">
-                  <li>Token theft &amp; replay</li>
-                  <li>Over-privileged permissions</li>
-                  <li>Auth bypass</li>
+                  <li data-severity="high">Token theft &amp; replay</li>
+                  <li data-severity="high" data-owasp="LLM06">Over-privileged permissions</li>
+                  <li data-severity="critical">Auth bypass</li>
                 </ul>
               </div>
             </div>
@@ -390,15 +422,42 @@
                   Attack Surface
                 </div>
                 <ul class="hub-attack-list">
-                  <li>Jailbreak &amp; guardrail bypass</li>
-                  <li>Hallucination exploitation</li>
-                  <li>Model poisoning</li>
+                  <li data-severity="critical" data-owasp="LLM01">Jailbreak &amp; guardrail bypass</li>
+                  <li data-severity="high" data-owasp="LLM09">Hallucination exploitation</li>
+                  <li data-severity="high" data-owasp="LLM04">Model poisoning</li>
                 </ul>
               </div>
             </div>
           </div>
 
           </div>
+
+          <!-- Connection line tooltip -->
+          <div class="hub-line-tooltip" id="hub-line-tooltip" aria-hidden="true"></div>
+
+          <!-- Detail slide-out panel -->
+          <div class="hub-detail-panel" id="hub-detail-panel" aria-hidden="true">
+            <button class="hub-detail-close" id="hub-detail-close" type="button" aria-label="Close panel">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <div class="hub-detail-body" id="hub-detail-body"></div>
+          </div>
+
+          <!-- Threat-mode scan line -->
+          <div class="hub-scan-line" aria-hidden="true"></div>
+
+          <!-- Attack chain floating labels (populated by JS) -->
+          <div class="hub-chain-labels" id="hub-chain-labels" aria-hidden="true"></div>
+
+          <!-- Attack chain progress bar -->
+          <div class="hub-chain-progress" id="hub-chain-progress" aria-hidden="true">
+            <div class="hub-chain-progress-fill" id="hub-chain-progress-fill"></div>
+            <span class="hub-chain-progress-text" id="hub-chain-progress-text"></span>
+          </div>
+
+          <!-- Attack chain summary card -->
+          <div class="hub-chain-summary" id="hub-chain-summary" aria-hidden="true"></div>
+
         </div>
       </div>
 

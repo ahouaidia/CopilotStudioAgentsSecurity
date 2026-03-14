@@ -546,7 +546,49 @@ h1, h2, h3, h4, h5, h6 {
 .hub-header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
+}
+
+/* ── Stat Counters ── */
+.hub-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hub-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.hub-stat-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-gold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.hub-stat-num.hub-stat-critical {
+  color: #f87171;
+}
+
+.hub-stat-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.hub-stat-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* ── Network particles background ── */
@@ -567,7 +609,7 @@ h1, h2, h3, h4, h5, h6 {
 .agent-hub {
   position: relative;
   width: 100%;
-  height: 720px;
+  height: 850px;
   z-index: 5;
   overflow: visible;
 }
@@ -580,6 +622,223 @@ h1, h2, h3, h4, h5, h6 {
   height: 100%;
   z-index: 1;
   pointer-events: none;
+}
+
+.hub-line-hit {
+  pointer-events: stroke;
+  cursor: pointer;
+  transition: stroke 0.3s ease;
+}
+
+.hub-line-hit:hover + .hub-line,
+.hub-line-hit:hover {
+  /* Just the hit area is transparent; the real line reacts via JS */
+}
+
+/* Connection line tooltip */
+.hub-line-tooltip {
+  position: absolute;
+  z-index: 30;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(33, 33, 41, 0.95);
+  border: 1px solid rgba(157, 131, 62, 0.3);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  line-height: 1.6;
+  max-width: 240px;
+  white-space: pre-line;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hub-line-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Detail Slide-Out Panel ── */
+.hub-detail-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 340px;
+  max-width: 90%;
+  z-index: 50;
+  background: rgba(33, 33, 41, 0.97);
+  border-left: 1px solid rgba(157, 131, 62, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow-y: auto;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.3);
+}
+
+.hub-detail-panel.open {
+  transform: translateX(0);
+}
+
+.hub-detail-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: 12px 12px 0 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  z-index: 2;
+}
+
+.hub-detail-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.hub-detail-body {
+  padding: 20px 24px 32px;
+}
+
+.hub-detail-body .detail-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.hub-detail-body .detail-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
+
+.hub-detail-body .detail-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.hub-detail-body .detail-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.hub-detail-body .detail-section-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hub-detail-body .detail-attack-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hub-detail-body .detail-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hub-detail-body .detail-badge-critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.hub-detail-body .detail-badge-high {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+}
+
+.hub-detail-body .detail-badge-medium {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde047;
+}
+
+.hub-detail-body .detail-mitigation {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+.hub-detail-body .detail-mitigation-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.hub-detail-body .detail-owasp {
+  display: inline-flex;
+  padding: 4px 10px;
+  margin: 2px;
+  border-radius: 6px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  background: rgba(157, 131, 62, 0.15);
+  color: var(--brand-gold);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .hub-detail-panel {
+    width: 100%;
+    max-width: 100%;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70vh;
+    transform: translateY(100%);
+    border-left: none;
+    border-top: 1px solid rgba(157, 131, 62, 0.2);
+    border-radius: 16px 16px 0 0;
+  }
+  .hub-detail-panel.open {
+    transform: translateY(0);
+  }
 }
 
 .hub-line {
@@ -596,7 +855,7 @@ h1, h2, h3, h4, h5, h6 {
 .hub-center {
   position: absolute;
   left: 50%;
-  top: 44%;
+  top: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
   width: 180px;
@@ -650,12 +909,12 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
 }
 
-/* Pentagon positions — clockwise from top (pushed down for header clearance) */
-.hub-node-topics    { left: 50%; top: 10%; }
-.hub-node-tools     { left: 85%; top: 32%; }
-.hub-node-knowledge { left: 74%; top: 82%; }
-.hub-node-identity  { left: 26%; top: 82%; }
-.hub-node-llm       { left: 15%; top: 32%; }
+/* Pentagon positions — equidistant from center, clockwise from top */
+.hub-node-topics    { left: 50%;   top: 17%; }
+.hub-node-tools     { left: 77%;   top: 40%; }
+.hub-node-knowledge { left: 66.5%; top: 77%; }
+.hub-node-identity  { left: 33.5%; top: 77%; }
+.hub-node-llm       { left: 23%;   top: 40%; }
 
 .hub-node-inner {
   position: relative;
@@ -757,6 +1016,45 @@ h1, h2, h3, h4, h5, h6 {
   background: #f87171;
 }
 
+/* OWASP Severity badges */
+.hub-attack-list li::after {
+  content: attr(data-severity);
+  display: inline-flex;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.hub-attack-list li[data-severity="critical"]::after {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.hub-attack-list li[data-severity="high"]::after {
+  background: rgba(249, 115, 22, 0.3);
+  color: #fdba74;
+}
+
+.hub-attack-list li[data-severity="medium"]::after {
+  background: rgba(234, 179, 8, 0.3);
+  color: #fde047;
+}
+
+/* OWASP code tooltip on badge hover */
+.hub-attack-list li[data-owasp] {
+  position: relative;
+}
+
+.hub-attack-list li[data-owasp]:hover::after {
+  content: attr(data-owasp) " • " attr(data-severity);
+}
+
 /* ── Hover & Active Attack States ── */
 
 /* Hover: show attack surface on individual node */
@@ -794,67 +1092,382 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
 }
 
-/* ── "Show All" Attacks Revealed State ── */
-.agent-hub.attacks-revealed .hub-node-attack {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+/* ── Security Lens Toggle ── */
+.hub-lens-toggle {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.agent-hub.attacks-revealed .hub-node-front {
-  opacity: 0.15;
-}
-
-.agent-hub.attacks-revealed .hub-node-inner {
-  border-color: rgba(239, 68, 68, 0.4) !important;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
-}
-
-.agent-hub.attacks-revealed .hub-line {
-  stroke: #ef4444 !important;
-  stroke-width: 2;
-  filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.3));
-}
-
-.agent-hub.attacks-revealed .hub-center-ring {
-  border-color: rgba(239, 68, 68, 0.5);
-  box-shadow: 0 0 40px rgba(239, 68, 68, 0.12);
-}
-
-.agent-hub.attacks-revealed .hub-center-pulse {
-  border-color: rgba(239, 68, 68, 0.2);
-}
-
-/* ── Show All Attack Surfaces Button ── */
-.hub-attacks-btn {
+.hub-lens-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 18px;
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  border-radius: 9999px;
-  background: rgba(239, 68, 68, 0.1);
-  color: #fca5a5;
+  gap: 6px;
+  padding: 7px 16px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.hub-attacks-btn:hover {
-  background: rgba(239, 68, 68, 0.18);
-  border-color: rgba(239, 68, 68, 0.55);
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.15);
-  color: #fecaca;
+.hub-lens-btn:hover {
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.hub-attacks-btn.active {
-  background: rgba(239, 68, 68, 0.22);
-  border-color: rgba(239, 68, 68, 0.6);
-  color: #fecaca;
+.hub-lens-btn.active[data-mode="architecture"] {
+  background: rgba(157, 131, 62, 0.2);
+  color: var(--brand-gold);
+  box-shadow: 0 0 8px rgba(157, 131, 62, 0.15);
+}
+
+.hub-lens-btn.active[data-mode="threat"] {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.15);
+}
+
+/* ── Simulate Attack Button ── */
+.hub-simulate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  border-radius: 9999px;
+  background: rgba(234, 179, 8, 0.08);
+  color: #fde047;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.hub-simulate-btn:hover {
+  background: rgba(234, 179, 8, 0.16);
+  border-color: rgba(234, 179, 8, 0.55);
+  box-shadow: 0 0 14px rgba(234, 179, 8, 0.12);
+}
+
+.hub-simulate-btn.running {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ── Threat Mode ── */
+.hub-container.threat-mode {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.hub-container.threat-mode .hub-header {
+  border-bottom-color: rgba(239, 68, 68, 0.2);
+}
+
+.hub-container.threat-mode .hub-aurora {
+  opacity: 0.12;
+  filter: hue-rotate(330deg) saturate(2);
+}
+
+.hub-container.threat-mode .hub-vignette {
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(127, 29, 29, 0.25) 100%);
+}
+
+.hub-container.threat-mode .hub-node-attack {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.hub-container.threat-mode .hub-node-front {
+  opacity: 0.15;
+}
+
+.hub-container.threat-mode .hub-node-inner {
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
+}
+
+.hub-container.threat-mode .hub-line {
+  stroke: #ef4444 !important;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.3));
+}
+
+.hub-container.threat-mode .hub-center-ring {
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.12);
+}
+
+.hub-container.threat-mode .hub-center-pulse {
+  border-color: rgba(239, 68, 68, 0.3);
+  animation-name: hubCenterPulseThreat;
+}
+
+@keyframes hubCenterPulseThreat {
+  0%, 100% { transform: scale(1); opacity: 0.5; box-shadow: 0 0 20px rgba(239, 68, 68, 0.25), inset 0 0 20px rgba(239, 68, 68, 0.1); }
+  50%      { transform: scale(1.12); opacity: 1; box-shadow: 0 0 40px rgba(239, 68, 68, 0.45), inset 0 0 30px rgba(239, 68, 68, 0.15); }
+}
+
+/* Scan line animation in threat mode */
+.hub-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 40;
+  background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.6), transparent);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hub-container.threat-mode .hub-scan-line {
+  opacity: 1;
+  animation: hubScanLine 4s linear infinite;
+}
+
+@keyframes hubScanLine {
+  0%   { top: 60px; }
+  100% { top: calc(100% - 2px); }
+}
+
+/* ── Attack Chain Simulation Elements ── */
+.hub-chain-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.hub-chain-label {
+  position: absolute;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.92);
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  opacity: 0;
+  transform: scale(0.7) translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hub-chain-label.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.hub-chain-label::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fde047;
+  margin-right: 6px;
+  vertical-align: middle;
+  animation: chainDotPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes chainDotPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+/* Progress bar */
+.hub-chain-progress {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 46;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.hub-chain-progress.active {
+  opacity: 1;
+}
+
+.hub-chain-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #ef4444, #f59e0b);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.hub-chain-progress-text {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Summary card */
+.hub-chain-summary {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 320px;
+  max-width: 90%;
+  z-index: 55;
+  background: rgba(33, 33, 41, 0.97);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hub-chain-summary.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
+.hub-chain-summary-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fca5a5;
+  margin-bottom: 12px;
+}
+
+.hub-chain-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.hub-chain-summary-step {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.hub-chain-summary-close {
+  display: block;
+  margin: 16px auto 0;
+  padding: 6px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hub-chain-summary-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* ── Node highlight during chain simulation ── */
+/* In chain mode only the chain-active nodes flip to attack view */
+.hub-container.chain-mode .hub-node .hub-node-attack {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.hub-container.chain-mode .hub-node .hub-node-front {
+  opacity: 1;
+}
+
+.hub-container.chain-mode .hub-node .hub-node-inner {
+  border-color: rgba(33, 33, 41, 0.08) !important;
+  box-shadow: 0 2px 12px rgba(33, 33, 41, 0.06) !important;
+}
+
+/* Chain-active nodes get the red attack reveal + strong glow */
+.hub-container.chain-mode .hub-node.chain-active .hub-node-attack {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.hub-container.chain-mode .hub-node.chain-active .hub-node-front {
+  opacity: 0.15;
+}
+
+.hub-container.chain-mode .hub-node.chain-active .hub-node-inner {
+  border-color: rgba(239, 68, 68, 0.7) !important;
+  box-shadow: 0 0 28px rgba(239, 68, 68, 0.35), 0 0 56px rgba(239, 68, 68, 0.12) !important;
+  animation: chainNodePulse 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+@keyframes chainNodePulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* Chain-active connection lines turn red one by one */
+.hub-container.chain-mode .hub-line {
+  transition: stroke 0.4s ease, stroke-width 0.4s ease, filter 0.4s ease;
+}
+
+.hub-container.chain-mode .hub-line.chain-line-active {
+  stroke: #ef4444 !important;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.4));
+}
+
+/* Orchestrator — chain-active glow */
+.hub-center.chain-active .hub-center-ring {
+  border-color: rgba(239, 68, 68, 0.8) !important;
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.3) !important;
 }
 
 /* ── Mobile / Tablet fallback ── */
