@@ -246,6 +246,64 @@
             </div>
           </div>
 
+          <!-- Scenario description panel — slides down from header -->
+          <div class="hub-scenario-panel" id="hub-scenario-panel" aria-hidden="true">
+            <button class="hub-scenario-close" id="hub-scenario-close" type="button" aria-label="Close scenario panel">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <div class="hub-scenario-inner">
+              <div class="hub-scenario-cols">
+                <div class="hub-scenario-col">
+                  <div class="hub-scenario-badge">
+                    <i data-lucide="file-warning" class="w-3.5 h-3.5" stroke-width="2"></i>
+                    Real-World Scenario
+                  </div>
+                  <h4 class="hub-scenario-title">Malicious Instruction Injection in an Event-Triggered Workflow</h4>
+                  <p class="hub-scenario-desc">
+                    A finance agent auto-processes emails to <strong>invoice@contoso.com</strong> via an event trigger.
+                    It uses a <strong>CRM connector</strong> to create invoice records, an <strong>email tool</strong> to send confirmations,
+                    and a <strong>knowledge base</strong> of finance policy docs for grounded answers.
+                  </p>
+                  <p class="hub-scenario-source">
+                    Source: <a href="https://www.microsoft.com/en-us/security/blog/2026/01/23/runtime-risk-realtime-defense-securing-ai-agents/" target="_blank" rel="noopener noreferrer">Microsoft Security Blog — Runtime Risk, Real-Time Defense</a>
+                  </p>
+                </div>
+                <div class="hub-scenario-col">
+                  <div class="hub-scenario-badge hub-scenario-badge-red">
+                    <i data-lucide="skull" class="w-3.5 h-3.5" stroke-width="2"></i>
+                    Attack Flow
+                  </div>
+                  <div class="hub-scenario-steps" id="hub-scenario-steps">
+                    <div class="hub-scenario-step" data-step="1">
+                      <div class="hub-scenario-step-num">1</div>
+                      <div><strong>Poisoned Email</strong> — Attacker sends crafted invoice with hidden instructions</div>
+                    </div>
+                    <div class="hub-scenario-step" data-step="2">
+                      <div class="hub-scenario-step-num">2</div>
+                      <div><strong>Plan Hijacked</strong> — Orchestrator interprets injected text as legitimate task</div>
+                    </div>
+                    <div class="hub-scenario-step" data-step="3">
+                      <div class="hub-scenario-step-num">3</div>
+                      <div><strong>Sensitive Data Queried</strong> — Knowledge base searched for confidential records</div>
+                    </div>
+                    <div class="hub-scenario-step" data-step="4">
+                      <div class="hub-scenario-step-num">4</div>
+                      <div><strong>Exfil Planned</strong> — Orchestrator chains results into email action</div>
+                    </div>
+                    <div class="hub-scenario-step" data-step="5">
+                      <div class="hub-scenario-step-num">5</div>
+                      <div><strong>Data Exfiltrated</strong> — Email tool sends sensitive data to attacker</div>
+                    </div>
+                    <div class="hub-scenario-step" data-step="6">
+                      <div class="hub-scenario-step-num">6</div>
+                      <div><strong>Root Cause</strong> — Agent's broad identity permissions made it all possible</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Aurora gradient mesh (dark variant of Oversharing hero) -->
           <div class="hub-aurora"></div>
 

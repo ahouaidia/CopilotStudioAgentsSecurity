@@ -501,52 +501,85 @@ function initAttackChainSimulation() {
   const progressFill = document.getElementById('hub-chain-progress-fill');
   const progressText = document.getElementById('hub-chain-progress-text');
   const summaryCard = document.getElementById('hub-chain-summary');
+  const scenarioPanel = document.getElementById('hub-scenario-panel');
+  const scenarioCloseBtn = document.getElementById('hub-scenario-close');
+  const scenarioSteps = document.querySelectorAll('.hub-scenario-step');
   if (!btn || !container || !labelsContainer) return;
 
+  // Close button on scenario panel — stops simulation, resets everything, returns to Architecture view
+  if (scenarioCloseBtn) {
+    scenarioCloseBtn.addEventListener('click', () => {
+      running = false;
+      cleanup();
+      closeScenarioPanel();
+      btn.classList.remove('running');
+      btn.querySelector('span').textContent = 'Simulate Attack';
+      // Switch back to Architecture view
+      if (window._setLensMode) window._setLensMode('architecture');
+    });
+  }
+
+  // ── Realistic scenario: Malicious instruction injection in event-triggered workflow
+  // Reference: Microsoft Security Blog — Runtime Risk, Real-Time Defense (Jan 2026)
   const CHAIN_STEPS = [
     {
       node: 'topics',
-      label: '1. Prompt Injection',
-      desc: 'Malicious input hijacks topic routing',
+      line: 'topics',
+      label: '1. Poisoned Email',
+      desc: 'Attacker sends crafted invoice email to invoice@contoso.com with hidden instructions',
       position: { left: '50%', top: '13%' },
       delay: 0,
     },
     {
       node: null, // orchestrator
-      label: '2. Orchestrator Compromised',
-      desc: 'LLM processes injected instructions as legitimate',
+      line: null,
+      label: '2. Plan Hijacked',
+      desc: 'Generative orchestrator interprets injected instructions as legitimate task steps',
       position: { left: '50%', top: '44%' },
-      delay: 1200,
-    },
-    {
-      node: 'tools',
-      label: '3. Privilege Escalation',
-      desc: 'Agent invokes connector with elevated permissions',
-      position: { left: '77%', top: '34%' },
-      delay: 2400,
+      delay: 1500,
     },
     {
       node: 'knowledge',
-      label: '4. Data Exfiltration',
-      desc: 'Sensitive data retrieved via oversharing RAG results',
+      line: 'knowledge',
+      label: '3. Sensitive Data Queried',
+      desc: 'Knowledge base searched for confidential finance records per attacker instructions',
       position: { left: '66.5%', top: '71%' },
-      delay: 3600,
+      delay: 3000,
+    },
+    {
+      node: null, // orchestrator again
+      line: null,
+      label: '4. Exfil Planned',
+      desc: 'Orchestrator chains knowledge results into outbound email action',
+      position: { left: '50%', top: '44%' },
+      delay: 4500,
+    },
+    {
+      node: 'tools',
+      line: 'tools',
+      label: '5. Data Exfiltrated',
+      desc: 'Email tool sends sensitive data to attacker@evil.com',
+      position: { left: '77%', top: '34%' },
+      delay: 6000,
     },
     {
       node: 'identity',
-      label: '5. Auth Context Abused',
-      desc: 'Delegated token permissions exceeded intended scope',
+      line: 'identity',
+      label: '6. Root Cause',
+      desc: 'Agent\'s broad service identity permissions made the entire chain possible',
       position: { left: '33.5%', top: '71%' },
-      delay: 4800,
+      delay: 7500,
+      isRootCause: true,
     },
   ];
 
-  const TOTAL_DURATION = 6500;
+  const TOTAL_DURATION = 9500;
   let running = false;
 
   function cleanup() {
     running = false;
     btn.classList.remove('running');
+    btn.querySelector('span').textContent = 'Simulate Attack';
     labelsContainer.innerHTML = '';
     progress.classList.remove('active');
     progressFill.style.width = '0%';
@@ -554,14 +587,51 @@ function initAttackChainSimulation() {
     container.classList.remove('chain-mode');
     container.querySelectorAll('.chain-active').forEach((el) => el.classList.remove('chain-active'));
     container.querySelectorAll('.chain-line-active').forEach((el) => el.classList.remove('chain-line-active'));
+    // Reset scenario step highlights
+    scenarioSteps.forEach((s) => {
+      s.classList.remove('step-active', 'step-done');
+    });
+  }
+
+  function closeScenarioPanel() {
+    if (scenarioPanel) {
+      scenarioPanel.classList.remove('open');
+      scenarioPanel.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function openScenarioPanel() {
+    if (scenarioPanel) {
+      scenarioPanel.classList.add('open');
+      scenarioPanel.setAttribute('aria-hidden', 'false');
+      if (window.lucide) lucide.createIcons({ nodes: [scenarioPanel] });
+    }
+  }
+
+  function highlightScenarioStep(stepIndex) {
+    scenarioSteps.forEach((s, i) => {
+      if (i < stepIndex) {
+        s.classList.remove('step-active');
+        s.classList.add('step-done');
+      } else if (i === stepIndex) {
+        s.classList.add('step-active');
+        s.classList.remove('step-done');
+      } else {
+        s.classList.remove('step-active', 'step-done');
+      }
+    });
   }
 
   function showSummary() {
     summaryCard.innerHTML = `
       <div class="hub-chain-summary-title">Attack Chain Complete</div>
+      <div style="font-size:0.62rem;color:rgba(255,255,255,0.4);margin-bottom:12px;line-height:1.5">
+        Without runtime protection, the attacker exfiltrated sensitive finance data
+        using only a crafted email — no credential theft required.
+      </div>
       ${CHAIN_STEPS.map((s, i) => `
         <div class="hub-chain-summary-item">
-          <div class="hub-chain-summary-step">${i + 1}</div>
+          <div class="hub-chain-summary-step" ${s.isRootCause ? 'style="background:rgba(234,179,8,0.2);color:#fde047"' : ''}>${i + 1}</div>
           <span>${s.desc}</span>
         </div>
       `).join('')}
@@ -570,14 +640,31 @@ function initAttackChainSimulation() {
     summaryCard.classList.add('visible');
     document.getElementById('chain-summary-close').addEventListener('click', () => {
       summaryCard.classList.remove('visible');
+      closeScenarioPanel();
       cleanup();
     });
   }
 
   btn.addEventListener('click', () => {
-    if (running) return;
+    // Handle "Reset" state (simulation finished but not cleaned up)
+    if (!running && btn.querySelector('span').textContent === 'Reset') {
+      cleanup();
+      closeScenarioPanel();
+      if (window._setLensMode) window._setLensMode('architecture');
+      return;
+    }
+    if (running) {
+      // Allow stopping mid-simulation
+      running = false;
+      summaryCard.classList.remove('visible');
+      closeScenarioPanel();
+      cleanup();
+      if (window._setLensMode) window._setLensMode('architecture');
+      return;
+    }
     running = true;
     btn.classList.add('running');
+    btn.querySelector('span').textContent = 'Stop Simulation';
 
     // Close detail panel if open
     const panel = document.getElementById('hub-detail-panel');
@@ -586,7 +673,10 @@ function initAttackChainSimulation() {
       panel.setAttribute('aria-hidden', 'true');
     }
 
-    // Use chain mode (not full threat view) so nodes light up individually
+    // Open scenario panel
+    openScenarioPanel();
+
+    // Use chain mode (nodes light up individually)
     container.classList.add('chain-mode');
 
     // Start progress bar
@@ -610,12 +700,17 @@ function initAttackChainSimulation() {
         // Update progress text
         progressText.textContent = step.label;
 
+        // Highlight scenario panel step
+        highlightScenarioStep(i);
+
         // Highlight the node + its connection line
         if (step.node) {
           const nodeEl = container.querySelector(`.hub-node[data-component="${step.node}"]`);
           if (nodeEl) nodeEl.classList.add('chain-active');
-          const line = container.querySelector(`.hub-line[data-target="${step.node}"]`);
-          if (line) line.classList.add('chain-line-active');
+          if (step.line) {
+            const line = container.querySelector(`.hub-line[data-target="${step.line}"]`);
+            if (line) line.classList.add('chain-line-active');
+          }
         } else {
           const center = container.querySelector('.hub-center');
           if (center) center.classList.add('chain-active');
@@ -624,6 +719,7 @@ function initAttackChainSimulation() {
         // Create floating label
         const label = document.createElement('div');
         label.className = 'hub-chain-label';
+        if (step.isRootCause) label.classList.add('root-cause');
         label.textContent = step.label;
         label.style.left = step.position.left;
         label.style.top = step.position.top;
@@ -639,10 +735,18 @@ function initAttackChainSimulation() {
       }, step.delay);
     });
 
-    // Show summary after chain completes
+    // Finish simulation after chain completes
     setTimeout(() => {
       if (!running) return;
-      showSummary();
+      // Mark all scenario steps as done
+      scenarioSteps.forEach((s) => {
+        s.classList.remove('step-active');
+        s.classList.add('step-done');
+      });
+      // Reset button so user can stop/reset
+      btn.classList.remove('running');
+      btn.querySelector('span').textContent = 'Reset';
+      running = false;
     }, TOTAL_DURATION);
   });
 }

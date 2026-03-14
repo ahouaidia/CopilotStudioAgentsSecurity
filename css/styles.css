@@ -464,6 +464,12 @@ h1, h2, h3, h4, h5, h6 {
   background: #ffffff;
   overflow: hidden;
   box-shadow: 0 0 24px rgba(33, 33, 41, 0.3);
+  transition: overflow 0.3s;
+}
+
+/* Allow overflow during chain mode so shifted nodes aren't clipped */
+.hub-container.chain-mode {
+  overflow: visible;
 }
 
 /* Aurora gradient mesh — light variant matching Oversharing hero */
@@ -612,6 +618,23 @@ h1, h2, h3, h4, h5, h6 {
   height: 850px;
   z-index: 5;
   overflow: visible;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Shift diagram right when scenario panel is open */
+.hub-container.chain-mode .agent-hub {
+  transform: translateX(85px);
+}
+
+/* Also shift chain labels and progress so they stay aligned with nodes */
+.hub-container.chain-mode .hub-chain-labels {
+  transform: translateX(85px);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hub-container.chain-mode .hub-chain-progress {
+  transform: translateX(calc(-50% + 85px));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* SVG connection lines overlay */
@@ -1162,8 +1185,195 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hub-simulate-btn.running {
-  pointer-events: none;
-  opacity: 0.6;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Scenario Description Panel ── */
+.hub-scenario-panel {
+  position: absolute;
+  top: 49px; /* sits right below the header */
+  left: 0;
+  bottom: 0;
+  width: 340px;
+  max-width: 90%;
+  z-index: 25;
+  background: rgba(25, 25, 32, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow-y: auto;
+  box-shadow: 8px 0 30px rgba(0, 0, 0, 0.3);
+}
+
+.hub-scenario-panel.open {
+  transform: translateX(0);
+}
+
+.hub-scenario-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hub-scenario-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hub-scenario-inner {
+  padding: 20px 20px 24px;
+}
+
+.hub-scenario-cols {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hub-scenario-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(157, 131, 62, 0.15);
+  color: var(--brand-gold);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.hub-scenario-badge-red {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.hub-scenario-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.hub-scenario-desc {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.hub-scenario-desc strong {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.hub-scenario-source {
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.hub-scenario-source a {
+  color: rgba(157, 131, 62, 0.6);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+.hub-scenario-source a:hover {
+  color: var(--brand-gold);
+}
+
+.hub-scenario-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hub-scenario-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.hub-scenario-step strong {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hub-scenario-step.step-active {
+  background: rgba(239, 68, 68, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hub-scenario-step.step-active strong {
+  color: #fca5a5;
+}
+
+.hub-scenario-step.step-done {
+  opacity: 0.4;
+}
+
+.hub-scenario-step-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.hub-scenario-step.step-active .hub-scenario-step-num {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.hub-scenario-step:last-child .hub-scenario-step-num {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fde047;
+}
+
+.hub-scenario-step:last-child.step-active .hub-scenario-step-num {
+  background: rgba(234, 179, 8, 0.3);
+  color: #fde047;
+}
+
+@media (max-width: 640px) {
+  .hub-scenario-panel {
+    width: 280px;
+  }
 }
 
 /* ── Threat Mode ── */
@@ -1272,6 +1482,15 @@ h1, h2, h3, h4, h5, h6 {
 .hub-chain-label.visible {
   opacity: 1;
   transform: scale(1) translateY(0);
+}
+
+.hub-chain-label.root-cause {
+  background: rgba(234, 179, 8, 0.92);
+  box-shadow: 0 4px 16px rgba(234, 179, 8, 0.3);
+}
+
+.hub-chain-label.root-cause::before {
+  background: #ef4444;
 }
 
 .hub-chain-label::before {
@@ -1429,7 +1648,14 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 2px 12px rgba(33, 33, 41, 0.06) !important;
 }
 
-/* Chain-active nodes get the red attack reveal + strong glow */
+/* Chain-active nodes rise above the scenario side panel */
+.hub-node.chain-active {
+  z-index: 30;
+}
+
+.hub-center.chain-active {
+  z-index: 30;
+}
 .hub-container.chain-mode .hub-node.chain-active .hub-node-attack {
   opacity: 1;
   transform: translateY(0);
@@ -1468,6 +1694,17 @@ h1, h2, h3, h4, h5, h6 {
 .hub-center.chain-active .hub-center-ring {
   border-color: rgba(239, 68, 68, 0.8) !important;
   box-shadow: 0 0 40px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Identity (root cause) — amber glow instead of red */
+.hub-container.chain-mode .hub-node-identity.chain-active .hub-node-inner {
+  border-color: rgba(234, 179, 8, 0.7) !important;
+  box-shadow: 0 0 28px rgba(234, 179, 8, 0.35), 0 0 56px rgba(234, 179, 8, 0.12) !important;
+}
+
+.hub-container.chain-mode .hub-line.chain-line-active[data-target="identity"] {
+  stroke: #f59e0b !important;
+  filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.4));
 }
 
 /* ── Mobile / Tablet fallback ── */
