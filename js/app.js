@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRiskList();
   initSpectrum();
   initPlaybook();
+  initDataFlow();
 });
 
 /* -------------------------------------------------------
@@ -1256,5 +1257,58 @@ function initPlaybook() {
   cards.forEach((card) => observer.observe(card));
 
   // Re-init Lucide icons for playbook section
+  if (window.lucide) lucide.createIcons();
+}
+
+/* -------------------------------------------------------
+   DATA FLOW DIAGRAM — Sequential step highlight
+------------------------------------------------------- */
+function initDataFlow() {
+  const diagram = document.getElementById('dataflow-diagram');
+  if (!diagram) return;
+
+  const steps = diagram.querySelectorAll('.dataflow-node-step');
+  if (!steps.length) return;
+
+  let activeIdx = 0;
+  let intervalId = null;
+
+  function highlightStep(idx) {
+    steps.forEach((s) => s.classList.remove('dataflow-active'));
+    if (steps[idx]) steps[idx].classList.add('dataflow-active');
+  }
+
+  function startCycle() {
+    if (intervalId) return;
+    highlightStep(activeIdx);
+    intervalId = setInterval(() => {
+      activeIdx = (activeIdx + 1) % steps.length;
+      highlightStep(activeIdx);
+    }, 2000);
+  }
+
+  function stopCycle() {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+    steps.forEach((s) => s.classList.remove('dataflow-active'));
+  }
+
+  // Start cycling when diagram scrolls into view
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        startCycle();
+      } else {
+        stopCycle();
+        activeIdx = 0;
+      }
+    });
+  }, { threshold: 0.3 });
+
+  observer.observe(diagram);
+
+  // Re-init Lucide icons for this section
   if (window.lucide) lucide.createIcons();
 }

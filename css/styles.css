@@ -2359,8 +2359,9 @@ h1, h2, h3, h4, h5, h6 {
 /* Main card */
 .playbook-card {
   position: relative;
-  border-radius: 14px;
+  border-radius: 14px 14px 0 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
   background: rgba(10, 10, 18, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2537,24 +2538,25 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(33, 33, 41, 0.5);
 }
 
-/* Risk mapping container below card */
+/* Risk mapping container — seamless bottom of card */
 .playbook-risk-map {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
   justify-content: center;
-  padding: 8px 10px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  align-content: center;
+  height: 62px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid transparent;
   border-top: none;
-  border-radius: 0 0 12px 12px;
-  margin-top: -1px;
-  transition: background 0.35s ease, border-color 0.35s ease;
+  border-radius: 0 0 14px 14px;
+  transition: background 0.35s ease;
 }
 
-.playbook-card-wrapper:hover .playbook-risk-map {
-  background: rgba(157, 131, 62, 0.06);
-  border-color: rgba(157, 131, 62, 0.2);
+.playbook-card-wrapper:hover .playbook-risk-map,
+.playbook-card-wrapper.is-open .playbook-risk-map {
+  background: rgba(245, 243, 238, 1);
 }
 
 .playbook-risk-ref {
@@ -2572,7 +2574,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: background 0.35s ease;
 }
 
-.playbook-card-wrapper:hover .playbook-risk-ref {
+.playbook-card-wrapper:hover .playbook-risk-ref,
+.playbook-card-wrapper.is-open .playbook-risk-ref {
   background: rgba(157, 131, 62, 0.18);
 }
 
@@ -2630,6 +2633,251 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (max-width: 1024px) and (min-width: 641px) {
   .playbook-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* =============================================
+   THREAT MODELING — Agent Reference Data Flow
+   ============================================= */
+
+.dataflow-diagram {
+  position: relative;
+  padding: 32px 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+}
+
+/* --- Orchestration Layer (top bar) --- */
+.dataflow-orchestration-layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dataflow-orch-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  background: rgba(0, 176, 163, 0.10);
+  border: 1px solid rgba(0, 176, 163, 0.25);
+  border-radius: 8px;
+  color: var(--brand-turquoise);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.dataflow-orch-bar:hover {
+  background: rgba(0, 176, 163, 0.18);
+  border-color: rgba(0, 176, 163, 0.4);
+  box-shadow: 0 0 20px rgba(0, 176, 163, 0.12);
+}
+
+.dataflow-orch-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.dataflow-orch-node:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dataflow-arrow-h {
+  color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+}
+
+/* --- Vertical Connectors --- */
+.dataflow-connectors {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 0;
+  padding: 0 60px;
+  margin-bottom: 12px;
+  height: 36px;
+}
+
+.dataflow-vconn,
+.dataflow-vconn-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(123, 94, 167, 0.5);
+  position: relative;
+}
+
+.dataflow-vconn-line {
+  display: block;
+  width: 1px;
+  height: 14px;
+  background: linear-gradient(to bottom, rgba(123, 94, 167, 0.4), rgba(123, 94, 167, 0.15));
+}
+
+.dataflow-vconn-feedback {
+  color: rgba(217, 61, 122, 0.5);
+}
+
+.dataflow-vconn-feedback .dataflow-vconn-line {
+  background: linear-gradient(to bottom, rgba(217, 61, 122, 0.4), rgba(217, 61, 122, 0.15));
+}
+
+/* --- Main Flow Steps (bottom row) --- */
+.dataflow-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.dataflow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 14px 14px;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.35;
+  position: relative;
+  transition: all 0.3s ease;
+  min-height: 70px;
+}
+
+.dataflow-node-start {
+  background: rgba(157, 131, 62, 0.15);
+  border: 1px solid rgba(157, 131, 62, 0.3);
+  color: var(--brand-gold);
+  padding: 10px 20px;
+  border-radius: 20px;
+  min-height: auto;
+  font-weight: 700;
+}
+
+.dataflow-node-end {
+  background: rgba(217, 61, 122, 0.12);
+  border: 1px solid rgba(217, 61, 122, 0.25);
+  color: var(--brand-pink);
+  padding: 10px 20px;
+  border-radius: 20px;
+  min-height: auto;
+  font-weight: 700;
+}
+
+.dataflow-node-step {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 160px;
+  cursor: default;
+}
+
+.dataflow-node-step:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.dataflow-node-num {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand-purple);
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dataflow-node-sub {
+  font-size: 0.58rem;
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 4px;
+}
+
+.dataflow-step-arrow {
+  color: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Pulse animation for active flow */
+.dataflow-node-step.dataflow-active {
+  border-color: var(--brand-purple);
+  background: rgba(123, 94, 167, 0.12);
+  box-shadow: 0 0 20px rgba(123, 94, 167, 0.15);
+}
+
+@keyframes dataflowPulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.4; }
+}
+
+.dataflow-step-arrow {
+  animation: dataflowPulse 3s ease-in-out infinite;
+}
+
+/* Security boundary markers on hover */
+.dataflow-node-step::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 12px;
+  border: 1px dashed transparent;
+  pointer-events: none;
+  transition: border-color 0.3s ease;
+}
+
+.dataflow-node-step:hover::after {
+  border-color: rgba(157, 131, 62, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dataflow-steps {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .dataflow-connectors {
+    display: none;
+  }
+  .dataflow-orchestration-layer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 
 /* ----- Scroll Reveal Animations ----- */
