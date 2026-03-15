@@ -2388,7 +2388,8 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 0;
 }
 
-.playbook-card-wrapper:hover .playbook-card::before {
+.playbook-card-wrapper:hover .playbook-card::before,
+.playbook-card-wrapper.is-open .playbook-card::before {
   opacity: 0.3;
   background:
     linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
@@ -2402,8 +2403,9 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1;
 }
 
-/* White hover — like oversharing project */
-.playbook-card-wrapper:hover .playbook-card {
+/* White hover / open — like oversharing project */
+.playbook-card-wrapper:hover .playbook-card,
+.playbook-card-wrapper.is-open .playbook-card {
   background: #fff;
   border-color: #fff;
   box-shadow: 0 12px 40px rgba(255, 255, 255, 0.12);
@@ -2430,7 +2432,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
 }
 
-.playbook-card-wrapper:hover .playbook-num {
+.playbook-card-wrapper:hover .playbook-num,
+.playbook-card-wrapper.is-open .playbook-num {
   background: var(--brand-gold);
   color: var(--bg-dark);
 }
@@ -2448,7 +2451,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: transform 0.35s ease, background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
 
-.playbook-card-wrapper:hover .playbook-icon-ring {
+.playbook-card-wrapper:hover .playbook-icon-ring,
+.playbook-card-wrapper.is-open .playbook-icon-ring {
   transform: scale(1.1);
 }
 
@@ -2479,23 +2483,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Hover icon adjustments for white bg */
-.playbook-card-wrapper:hover .playbook-icon-verify {
+.playbook-card-wrapper:hover .playbook-icon-verify,
+.playbook-card-wrapper.is-open .playbook-icon-verify {
   background: rgba(0, 176, 163, 0.15);
   border-color: rgba(0, 176, 163, 0.5);
 }
-.playbook-card-wrapper:hover .playbook-icon-exposure {
+.playbook-card-wrapper:hover .playbook-icon-exposure,
+.playbook-card-wrapper.is-open .playbook-icon-exposure {
   background: rgba(22, 171, 224, 0.15);
   border-color: rgba(22, 171, 224, 0.5);
 }
-.playbook-card-wrapper:hover .playbook-icon-auth {
+.playbook-card-wrapper:hover .playbook-icon-auth,
+.playbook-card-wrapper.is-open .playbook-icon-auth {
   background: rgba(123, 94, 167, 0.15);
   border-color: rgba(123, 94, 167, 0.5);
 }
-.playbook-card-wrapper:hover .playbook-icon-orchestration {
+.playbook-card-wrapper:hover .playbook-icon-orchestration,
+.playbook-card-wrapper.is-open .playbook-icon-orchestration {
   background: rgba(217, 61, 122, 0.15);
   border-color: rgba(217, 61, 122, 0.5);
 }
-.playbook-card-wrapper:hover .playbook-icon-cleanup {
+.playbook-card-wrapper:hover .playbook-icon-cleanup,
+.playbook-card-wrapper.is-open .playbook-icon-cleanup {
   background: rgba(157, 131, 62, 0.15);
   border-color: rgba(157, 131, 62, 0.5);
 }
@@ -2511,7 +2520,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: color 0.35s ease;
 }
 
-.playbook-card-wrapper:hover .playbook-card-title {
+.playbook-card-wrapper:hover .playbook-card-title,
+.playbook-card-wrapper.is-open .playbook-card-title {
   color: var(--bg-dark);
 }
 
@@ -2522,7 +2532,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: color 0.35s ease;
 }
 
-.playbook-card-wrapper:hover .playbook-card-hint {
+.playbook-card-wrapper:hover .playbook-card-hint,
+.playbook-card-wrapper.is-open .playbook-card-hint {
   color: rgba(33, 33, 41, 0.5);
 }
 
