@@ -562,18 +562,9 @@ function initAttackChainSimulation() {
       position: { left: '77%', top: '34%' },
       delay: 6000,
     },
-    {
-      node: 'identity',
-      line: 'identity',
-      label: '6. Root Cause',
-      desc: 'Agent\'s broad service identity permissions made the entire chain possible',
-      position: { left: '33.5%', top: '71%' },
-      delay: 7500,
-      isRootCause: true,
-    },
   ];
 
-  const TOTAL_DURATION = 9500;
+  const TOTAL_DURATION = 8000;
   let running = false;
 
   function cleanup() {
@@ -631,7 +622,7 @@ function initAttackChainSimulation() {
       </div>
       ${CHAIN_STEPS.map((s, i) => `
         <div class="hub-chain-summary-item">
-          <div class="hub-chain-summary-step" ${s.isRootCause ? 'style="background:rgba(234,179,8,0.2);color:#fde047"' : ''}>${i + 1}</div>
+          <div class="hub-chain-summary-step">${i + 1}</div>
           <span>${s.desc}</span>
         </div>
       `).join('')}

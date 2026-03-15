@@ -1696,17 +1696,6 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 40px rgba(239, 68, 68, 0.3) !important;
 }
 
-/* Identity (root cause) — amber glow instead of red */
-.hub-container.chain-mode .hub-node-identity.chain-active .hub-node-inner {
-  border-color: rgba(234, 179, 8, 0.7) !important;
-  box-shadow: 0 0 28px rgba(234, 179, 8, 0.35), 0 0 56px rgba(234, 179, 8, 0.12) !important;
-}
-
-.hub-container.chain-mode .hub-line.chain-line-active[data-target="identity"] {
-  stroke: #f59e0b !important;
-  filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.4));
-}
-
 /* ── Mobile / Tablet fallback ── */
 @media (max-width: 1023px) {
   .hub-header {
