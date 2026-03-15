@@ -60,7 +60,7 @@
       <div class="flex items-center gap-6 nav-links-container nav-links-hero text-xs tracking-wide uppercase">
         <a href="#anatomy"         class="nav-link hover:text-brand-gold">Anatomy</a>
         <a href="#top10-risks"  class="nav-link hover:text-brand-gold">Top 10 Risks</a>
-        <a href="#threat-modeling" class="nav-link hover:text-brand-gold">Threat Modeling</a>
+        <a href="#playbook" class="nav-link hover:text-brand-gold">Playbook</a>
         <a href="#defenses"        class="nav-link hover:text-brand-gold">Defenses</a>
         <a href="#labs"            class="nav-link hover:text-brand-gold">Labs</a>
       </div>
@@ -936,21 +936,173 @@
   </section>
 
   <!-- ============================================================
-       SECTION 3 — THREAT MODELING (placeholder)
+       SECTION 3 — MITIGATION PLAYBOOK
        ============================================================ -->
-  <section id="threat-modeling" class="py-24 bg-brand-black">
+  <section id="playbook" class="py-24 bg-brand-black">
     <div class="max-w-6xl mx-auto px-6">
       <div class="reveal mb-16">
         <div class="section-accent mb-4"></div>
         <h2 class="font-heading text-3xl sm:text-4xl font-bold text-white">
-          Threat Modeling
+          Mitigation Playbook
         </h2>
-        <p class="mt-3 text-sm text-white/50 max-w-xl leading-relaxed">
-          Applying STRIDE and AI-specific threat frameworks to Copilot Studio agents.
+        <p class="mt-3 text-sm text-white/50 max-w-2xl leading-relaxed">
+          Five concrete steps to close common agent security gaps before they're exploited. Click any card to reveal the action checklist.
+          <a href="https://www.microsoft.com/en-us/security/blog/2026/02/12/copilot-studio-agent-security-top-10-risks-detect-prevent/" target="_blank" rel="noopener noreferrer" class="text-brand-gold/60 hover:text-brand-gold underline underline-offset-2 ml-1">Source: Microsoft Security Blog</a>
         </p>
       </div>
-      <div class="reveal text-center py-20 text-white/20 text-sm uppercase tracking-widest">
-        — Content coming soon —
+
+      <div class="flex justify-end mb-4">
+        <button id="playbook-reveal-all" class="playbook-reveal-btn" type="button">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Reveal All</span>
+        </button>
+      </div>
+
+      <div class="playbook-grid reveal" id="playbook-grid">
+
+        <!-- Step 1 -->
+        <div class="playbook-card-wrapper" data-step="1">
+          <div class="playbook-card playbook-card-verify">
+            <div class="playbook-num">1</div>
+            <div class="playbook-icon-ring playbook-icon-verify">
+              <i data-lucide="clipboard-check" class="w-8 h-8"></i>
+            </div>
+            <h3 class="playbook-card-title">Verify Intent &amp; Ownership</h3>
+            <p class="playbook-card-hint">Confirm every agent has a purpose and an accountable owner</p>
+          </div>
+          <div class="playbook-risk-map">
+            <span class="playbook-risk-ref">Risk 1</span>
+            <span class="playbook-risk-ref">Risk 2</span>
+            <span class="playbook-risk-ref">Risk 5</span>
+            <span class="playbook-risk-ref">Risk 10</span>
+          </div>
+          <div class="playbook-detail">
+            <div class="playbook-detail-inner">
+              <ul class="playbook-actions">
+                <li>Validate business justification for broad sharing, public access, or elevated permissions with the agent owner</li>
+                <li>Confirm agents without authentication are explicitly designed for public use and approved by policy</li>
+                <li>Review agent topics, actions, and knowledge sources for unintentional data exposure</li>
+                <li>Ensure every agent has an active, accountable owner — reassign or retire orphaned agents</li>
+                <li>Validate whether dormant agents, connections, or actions are still required</li>
+                <li>Perform periodic reviews and establish a clear organizational policy for agent creation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="playbook-card-wrapper" data-step="2">
+          <div class="playbook-card playbook-card-exposure">
+            <div class="playbook-num">2</div>
+            <div class="playbook-icon-ring playbook-icon-exposure">
+              <i data-lucide="shield-off" class="w-8 h-8"></i>
+            </div>
+            <h3 class="playbook-card-title">Reduce Exposure &amp; Tighten Access</h3>
+            <p class="playbook-card-hint">Limit who can reach the agent — and what the agent can reach</p>
+          </div>
+          <div class="playbook-risk-map">
+            <span class="playbook-risk-ref">Risk 1</span>
+            <span class="playbook-risk-ref">Risk 2</span>
+            <span class="playbook-risk-ref">Risk 4</span>
+          </div>
+          <div class="playbook-detail">
+            <div class="playbook-detail-inner">
+              <ul class="playbook-actions">
+                <li>Restrict agent sharing to well-scoped, role-based security groups</li>
+                <li>Establish organizational policies defining when broad sharing or public access is allowed</li>
+                <li>Enforce full authentication by default — only allow unauthenticated access when explicitly approved</li>
+                <li>Restrict email actions to approved domains or hardcoded recipients</li>
+                <li>Avoid AI-controlled dynamic inputs for sensitive outbound actions</li>
+                <li>Perform periodic reviews of shared agents to ensure visibility remains appropriate</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="playbook-card-wrapper" data-step="3">
+          <div class="playbook-card playbook-card-auth">
+            <div class="playbook-num">3</div>
+            <div class="playbook-icon-ring playbook-icon-auth">
+              <i data-lucide="lock-keyhole" class="w-8 h-8"></i>
+            </div>
+            <h3 class="playbook-card-title">Enforce Strong Auth &amp; Least Privilege</h3>
+            <p class="playbook-card-hint">Agents must not inherit more privilege than necessary</p>
+          </div>
+          <div class="playbook-risk-map">
+            <span class="playbook-risk-ref">Risk 6</span>
+            <span class="playbook-risk-ref">Risk 7</span>
+            <span class="playbook-risk-ref">Risk 8</span>
+          </div>
+          <div class="playbook-detail">
+            <div class="playbook-detail-inner">
+              <ul class="playbook-actions">
+                <li>Replace author authentication with user-based or system-based authentication</li>
+                <li>Review all tools running with delegated access and reconfigure those exposing sensitive services</li>
+                <li>Audit MCP tools that rely on creator credentials — remove or update if no longer required</li>
+                <li>Apply the principle of least privilege to all connectors, actions, and data access paths</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="playbook-card-wrapper" data-step="4">
+          <div class="playbook-card playbook-card-orchestration">
+            <div class="playbook-num">4</div>
+            <div class="playbook-icon-ring playbook-icon-orchestration">
+              <i data-lucide="cpu" class="w-8 h-8"></i>
+            </div>
+            <h3 class="playbook-card-title">Harden Orchestration &amp; Dynamic Behavior</h3>
+            <p class="playbook-card-hint">Generative agents need explicit guardrails to prevent unsafe behavior</p>
+          </div>
+          <div class="playbook-risk-map">
+            <span class="playbook-risk-ref">Risk 3</span>
+            <span class="playbook-risk-ref">Risk 4</span>
+            <span class="playbook-risk-ref">Risk 9</span>
+          </div>
+          <div class="playbook-detail">
+            <div class="playbook-detail-inner">
+              <ul class="playbook-actions">
+                <li>Configure clear, well-structured instructions for generative orchestration</li>
+                <li>Avoid allowing the model to dynamically decide email recipients, external endpoints, or execution logic</li>
+                <li>Review HTTP Request actions — confirm endpoint, scheme, and port are required</li>
+                <li>Prefer official connectors over raw HTTP requests for authentication, governance, and logging</li>
+                <li>Enforce HTTPS and avoid nonstandard ports unless explicitly approved</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="playbook-card-wrapper" data-step="5">
+          <div class="playbook-card playbook-card-cleanup">
+            <div class="playbook-num">5</div>
+            <div class="playbook-icon-ring playbook-icon-cleanup">
+              <i data-lucide="trash-2" class="w-8 h-8"></i>
+            </div>
+            <h3 class="playbook-card-title">Eliminate Dead Weight &amp; Protect Secrets</h3>
+            <p class="playbook-card-hint">Unused capabilities and embedded secrets quietly expand the attack surface</p>
+          </div>
+          <div class="playbook-risk-map">
+            <span class="playbook-risk-ref">Risk 5</span>
+            <span class="playbook-risk-ref">Risk 7</span>
+            <span class="playbook-risk-ref">Risk 8</span>
+            <span class="playbook-risk-ref">Risk 10</span>
+          </div>
+          <div class="playbook-detail">
+            <div class="playbook-detail-inner">
+              <ul class="playbook-actions">
+                <li>Remove or deactivate dormant agents, unpublished drafts, unused actions, and stale connections</li>
+                <li>Clean up outdated or unnecessary MCP tool configurations</li>
+                <li>Remove actions using author authentication in classic orchestration that are no longer referenced</li>
+                <li>Externalize all secrets to Azure Key Vault — reference via environment variables, never embed in agent logic</li>
+                <li>Treat agents as production assets and include them in regular lifecycle governance reviews</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>

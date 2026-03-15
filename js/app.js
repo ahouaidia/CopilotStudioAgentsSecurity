@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAttackChainSimulation();
   initRiskList();
   initSpectrum();
+  initPlaybook();
 });
 
 /* -------------------------------------------------------
@@ -1185,4 +1186,75 @@ function startThreatCycle() {
     runWave();
     setInterval(runWave, CYCLE);
   }, 1200);
+}
+
+/* -------------------------------------------------------
+   PLAYBOOK — Flip cards + staggered reveal
+------------------------------------------------------- */
+function initPlaybook() {
+  const cards = document.querySelectorAll('.playbook-card-wrapper');
+  if (!cards.length) return;
+
+  // Click to expand/collapse detail panel
+  cards.forEach((wrapper) => {
+    wrapper.addEventListener('click', () => {
+      const isOpen = wrapper.classList.contains('is-open');
+
+      // Close all others
+      cards.forEach((other) => {
+        if (other !== wrapper) other.classList.remove('is-open');
+      });
+
+      // Toggle current
+      wrapper.classList.toggle('is-open', !isOpen);
+
+      // Sync reveal-all button state
+      if (revealBtn) {
+        const label = revealBtn.querySelector('span');
+        const allOpen = Array.from(cards).every(c => c.classList.contains('is-open'));
+        revealBtn.classList.toggle('is-active', allOpen);
+        if (label) label.textContent = allOpen ? 'Collapse All' : 'Reveal All';
+      }
+    });
+  });
+
+  // Reveal-all button
+  const revealBtn = document.getElementById('playbook-reveal-all');
+  if (revealBtn) {
+    revealBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const allOpen = Array.from(cards).every(c => c.classList.contains('is-open'));
+      const label = revealBtn.querySelector('span');
+
+      if (allOpen) {
+        cards.forEach(c => c.classList.remove('is-open'));
+        revealBtn.classList.remove('is-active');
+        if (label) label.textContent = 'Reveal All';
+      } else {
+        cards.forEach((c, i) => {
+          setTimeout(() => c.classList.add('is-open'), i * 80);
+        });
+        revealBtn.classList.add('is-active');
+        if (label) label.textContent = 'Collapse All';
+      }
+    });
+  }
+
+  // Staggered reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(cards).indexOf(entry.target);
+        setTimeout(() => {
+          entry.target.classList.add('playbook-visible');
+        }, idx * 120);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+  cards.forEach((card) => observer.observe(card));
+
+  // Re-init Lucide icons for playbook section
+  if (window.lucide) lucide.createIcons();
 }

@@ -2304,6 +2304,323 @@ h1, h2, h3, h4, h5, h6 {
 .hub-node-identity .hub-node-inner  { border-color: rgba(123, 94, 167, 0.25); }
 .hub-node-llm .hub-node-inner       { border-color: rgba(157, 131, 62, 0.25); }
 
+/* ============================================================
+   MITIGATION PLAYBOOK — Cards with expandable detail
+   ============================================================ */
+.playbook-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.playbook-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.playbook-card-wrapper.playbook-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reveal-all toggle button */
+.playbook-reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(157, 131, 62, 0.4);
+  background: transparent;
+  color: var(--brand-gold);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.playbook-reveal-btn:hover {
+  background: rgba(157, 131, 62, 0.12);
+  border-color: var(--brand-gold);
+}
+
+.playbook-reveal-btn.is-active {
+  background: rgba(157, 131, 62, 0.15);
+  border-color: var(--brand-gold);
+}
+
+/* Main card */
+.playbook-card {
+  position: relative;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 10, 18, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 28px 16px 24px;
+  min-height: 280px;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+/* Circuit grid overlay on cards — matches hero circuit grid */
+.playbook-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(192, 105, 255, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192, 105, 255, 0.10) 1px, transparent 1px);
+  background-size: 30px 30px;
+  transition: opacity 0.35s ease;
+  z-index: 0;
+}
+
+.playbook-card-wrapper:hover .playbook-card::before {
+  opacity: 0.3;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* Ensure card content sits above the grid */
+.playbook-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* White hover — like oversharing project */
+.playbook-card-wrapper:hover .playbook-card {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 12px 40px rgba(255, 255, 255, 0.12);
+  transform: translateY(-3px);
+}
+
+/* Step number badge */
+.playbook-num {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--brand-gold);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--brand-gold);
+  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+.playbook-card-wrapper:hover .playbook-num {
+  background: var(--brand-gold);
+  color: var(--bg-dark);
+}
+
+/* Icon rings */
+.playbook-icon-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 12px;
+  transition: transform 0.35s ease, background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+.playbook-card-wrapper:hover .playbook-icon-ring {
+  transform: scale(1.1);
+}
+
+.playbook-icon-verify {
+  background: rgba(0, 176, 163, 0.12);
+  border: 1.5px solid rgba(0, 176, 163, 0.3);
+  color: var(--brand-turquoise);
+}
+.playbook-icon-exposure {
+  background: rgba(22, 171, 224, 0.12);
+  border: 1.5px solid rgba(22, 171, 224, 0.3);
+  color: var(--brand-blue);
+}
+.playbook-icon-auth {
+  background: rgba(123, 94, 167, 0.12);
+  border: 1.5px solid rgba(123, 94, 167, 0.3);
+  color: var(--brand-purple);
+}
+.playbook-icon-orchestration {
+  background: rgba(217, 61, 122, 0.12);
+  border: 1.5px solid rgba(217, 61, 122, 0.3);
+  color: var(--brand-pink);
+}
+.playbook-icon-cleanup {
+  background: rgba(157, 131, 62, 0.12);
+  border: 1.5px solid rgba(157, 131, 62, 0.3);
+  color: var(--brand-gold);
+}
+
+/* Hover icon adjustments for white bg */
+.playbook-card-wrapper:hover .playbook-icon-verify {
+  background: rgba(0, 176, 163, 0.15);
+  border-color: rgba(0, 176, 163, 0.5);
+}
+.playbook-card-wrapper:hover .playbook-icon-exposure {
+  background: rgba(22, 171, 224, 0.15);
+  border-color: rgba(22, 171, 224, 0.5);
+}
+.playbook-card-wrapper:hover .playbook-icon-auth {
+  background: rgba(123, 94, 167, 0.15);
+  border-color: rgba(123, 94, 167, 0.5);
+}
+.playbook-card-wrapper:hover .playbook-icon-orchestration {
+  background: rgba(217, 61, 122, 0.15);
+  border-color: rgba(217, 61, 122, 0.5);
+}
+.playbook-card-wrapper:hover .playbook-icon-cleanup {
+  background: rgba(157, 131, 62, 0.15);
+  border-color: rgba(157, 131, 62, 0.5);
+}
+
+/* Card title — big and centered */
+.playbook-card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.35;
+  margin-bottom: 10px;
+  transition: color 0.35s ease;
+}
+
+.playbook-card-wrapper:hover .playbook-card-title {
+  color: var(--bg-dark);
+}
+
+.playbook-card-hint {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.5;
+  transition: color 0.35s ease;
+}
+
+.playbook-card-wrapper:hover .playbook-card-hint {
+  color: rgba(33, 33, 41, 0.5);
+}
+
+/* Risk mapping container below card */
+.playbook-risk-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  margin-top: -1px;
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.playbook-card-wrapper:hover .playbook-risk-map {
+  background: rgba(157, 131, 62, 0.06);
+  border-color: rgba(157, 131, 62, 0.2);
+}
+
+.playbook-risk-ref {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brand-gold);
+  background: rgba(157, 131, 62, 0.1);
+  border: 1px solid rgba(157, 131, 62, 0.2);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  transition: background 0.35s ease;
+}
+
+.playbook-card-wrapper:hover .playbook-risk-ref {
+  background: rgba(157, 131, 62, 0.18);
+}
+
+/* Expandable detail panel */
+.playbook-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.playbook-card-wrapper.is-open .playbook-detail {
+  max-height: 500px;
+}
+
+.playbook-detail-inner {
+  padding: 14px 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  margin-top: -1px;
+}
+
+.playbook-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.playbook-actions li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.playbook-actions li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--brand-gold);
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .playbook-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 1024px) and (min-width: 641px) {
+  .playbook-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ----- Scroll Reveal Animations ----- */
 .reveal {
   opacity: 0;
