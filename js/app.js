@@ -207,10 +207,13 @@ function initDetailPanel() {
     panel.setAttribute('aria-hidden', 'true');
   }
 
-  // Click on node → open panel (desktop only: ≥1024)
+  // Click on node → open panel (desktop only: ≥1024, not during simulation)
   nodes.forEach((node) => {
     node.addEventListener('click', (e) => {
       if (window.innerWidth < 1024) return; // mobile uses tap-to-reveal
+      // Block detail panel during attack chain simulation
+      const hubContainer = document.getElementById('hub-container');
+      if (hubContainer && hubContainer.classList.contains('chain-mode')) return;
       e.stopPropagation();
       const id = node.dataset.component;
       if (panel.classList.contains('open') && body.dataset.current === id) {

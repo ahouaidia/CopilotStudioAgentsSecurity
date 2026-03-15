@@ -457,19 +457,13 @@ h1, h2, h3, h4, h5, h6 {
    ========================================================= */
 
 /* Outer container with header */
-.hub-container {
+.hub-container {  
   position: relative;
   border-radius: 1rem;
   border: 2px solid rgba(33, 33, 41, 0.95);
   background: #ffffff;
   overflow: hidden;
   box-shadow: 0 0 24px rgba(33, 33, 41, 0.3);
-  transition: overflow 0.3s;
-}
-
-/* Allow overflow during chain mode so shifted nodes aren't clipped */
-.hub-container.chain-mode {
-  overflow: visible;
 }
 
 /* Aurora gradient mesh — light variant matching Oversharing hero */
@@ -523,7 +517,8 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   padding: 12px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(33, 33, 41, 0.95);
+  background: var(--brand-gold);
+  box-shadow: 0 4px 16px rgba(157, 131, 62, 0.35);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -545,7 +540,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Libre Baskerville', serif;
   font-size: 0.85rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  color: #212129;
   letter-spacing: 0.02em;
 }
 
@@ -572,20 +567,20 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Montserrat', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--brand-gold);
+  color: #212129;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 .hub-stat-num.hub-stat-critical {
-  color: #f87171;
+  color: #7f1d1d;
 }
 
 .hub-stat-label {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.55rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(33, 33, 41, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   line-height: 1;
@@ -594,7 +589,7 @@ h1, h2, h3, h4, h5, h6 {
 .hub-stat-divider {
   width: 1px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(33, 33, 41, 0.2);
 }
 
 /* ── Network particles background ── */
@@ -706,6 +701,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .hub-detail-panel.open {
   transform: translateX(0);
+}
+
+/* Hide detail panel during attack chain simulation */
+.hub-container.chain-mode .hub-detail-panel {
+  transform: translateX(100%) !important;
+  pointer-events: none;
 }
 
 .hub-detail-close {
@@ -1118,10 +1119,10 @@ h1, h2, h3, h4, h5, h6 {
 /* ── Security Lens Toggle ── */
 .hub-lens-toggle {
   display: inline-flex;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(33, 33, 41, 0.2);
   border-radius: 9999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(33, 33, 41, 0.08);
 }
 
 .hub-lens-btn {
@@ -1131,7 +1132,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 7px 16px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(33, 33, 41, 0.55);
   font-family: 'Montserrat', sans-serif;
   font-size: 0.6rem;
   font-weight: 600;
@@ -1143,19 +1144,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hub-lens-btn:hover {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(33, 33, 41, 0.85);
 }
 
 .hub-lens-btn.active[data-mode="architecture"] {
-  background: rgba(157, 131, 62, 0.2);
-  color: var(--brand-gold);
-  box-shadow: 0 0 8px rgba(157, 131, 62, 0.15);
+  background: rgba(33, 33, 41, 0.85);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(33, 33, 41, 0.2);
 }
 
 .hub-lens-btn.active[data-mode="threat"] {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(127, 29, 29, 0.85);
   color: #fca5a5;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
 }
 
 /* ── Simulate Attack Button ── */
@@ -1164,10 +1165,10 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   gap: 6px;
   padding: 7px 16px;
-  border: 1px solid rgba(234, 179, 8, 0.35);
+  border: 1px solid rgba(33, 33, 41, 0.3);
   border-radius: 9999px;
-  background: rgba(234, 179, 8, 0.08);
-  color: #fde047;
+  background: rgba(33, 33, 41, 0.85);
+  color: #fff;
   font-family: 'Montserrat', sans-serif;
   font-size: 0.6rem;
   font-weight: 600;
@@ -1179,9 +1180,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hub-simulate-btn:hover {
-  background: rgba(234, 179, 8, 0.16);
-  border-color: rgba(234, 179, 8, 0.55);
-  box-shadow: 0 0 14px rgba(234, 179, 8, 0.12);
+  background: rgba(33, 33, 41, 0.95);
+  border-color: rgba(33, 33, 41, 0.5);
+  box-shadow: 0 0 14px rgba(33, 33, 41, 0.2);
 }
 
 .hub-simulate-btn.running {
