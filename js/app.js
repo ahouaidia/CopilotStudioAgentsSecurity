@@ -1261,54 +1261,641 @@ function initPlaybook() {
 }
 
 /* -------------------------------------------------------
-   DATA FLOW DIAGRAM — Sequential step highlight
+   DATA FLOW DIAGRAM — Cytoscape Interactive Graph
+   Adapted from DFDReviewQueue.jsx Cytoscape patterns
 ------------------------------------------------------- */
 function initDataFlow() {
-  const diagram = document.getElementById('dataflow-diagram');
-  if (!diagram) return;
+  const container = document.getElementById('dataflow-cy');
+  if (!container) return;
 
-  const steps = diagram.querySelectorAll('.dataflow-node-step');
-  if (!steps.length) return;
-
-  let activeIdx = 0;
-  let intervalId = null;
-
-  function highlightStep(idx) {
-    steps.forEach((s) => s.classList.remove('dataflow-active'));
-    if (steps[idx]) steps[idx].classList.add('dataflow-active');
+  // ── Verify all required libraries ──
+  const libs = {
+    cytoscape: window.cytoscape,
+    dagre:     window.dagre,
+    'cytoscape-dagre': window.cytoscapeDagre
+  };
+  const missing = Object.entries(libs).filter(([, v]) => !v).map(([k]) => k);
+  if (missing.length) {
+    console.warn('[DataFlow] Missing libraries:', missing.join(', '));
+    container.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:60px 20px;font-size:14px;">' +
+      'Data flow diagram requires: ' + missing.join(', ') + '</p>';
+    return;
   }
 
-  function startCycle() {
-    if (intervalId) return;
-    highlightStep(activeIdx);
-    intervalId = setInterval(() => {
-      activeIdx = (activeIdx + 1) % steps.length;
-      highlightStep(activeIdx);
-    }, 2000);
-  }
+  // Register dagre layout (safe even if auto-registered at load time)
+  try { cytoscape.use(cytoscapeDagre); } catch (_) { /* already registered */ }
 
-  function stopCycle() {
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
+  // ── Node positions matching the reference diagram ──
+  // Two rows: top = orchestration + external, bottom = main flow
+  // X increases left→right, Y: top row ≈ 100, bottom row ≈ 300, End below synth ≈ 400
+  const positions = {
+    start:  { x:  60, y: 300 },
+    prompt: { x: 260, y: 300 },
+    intent: { x: 460, y: 300 },
+    match:  { x: 660, y: 300 },
+    run:    { x: 860, y: 300 },
+    synth:  { x: 1060, y: 300 },
+    end:    { x: 1060, y: 430 },
+    orch:   { x: 380, y: 110 },
+    tool:   { x: 760, y: 110 },
+    data:   { x: 920, y: 110 }
+  };
+
+  // ── Node & Edge Data Model ──
+  const nodes = [
+    { id: 'start',   label: 'Start',   type: 'terminal', nodeType: 'start', icon: 'play' },
+    { id: 'prompt',  label: 'Initial\nprompt', type: 'step', step: 1, icon: 'message-square', risk: 'medium',
+      threat: 'Prompt injection', desc: 'User prompts enter as raw, untrusted data. Malicious inputs can manipulate agent behavior.' },
+    { id: 'intent',  label: 'Assess\nintent', type: 'step', step: 2, icon: 'scan-search', risk: 'high',
+      threat: 'Intent manipulation', desc: 'The orchestrator classifies user intent. Adversarial prompts can trick intent detection into wrong pathways.' },
+    { id: 'match',   label: 'Match content\nto response logic', type: 'step', step: 3, icon: 'route', risk: 'high',
+      threat: 'Logic bypass', desc: 'Content is routed to the correct response handler. Misrouting can expose unauthorized capabilities.' },
+    { id: 'run',     label: 'Run response\nlogic', type: 'step', step: 4, icon: 'zap', risk: 'high',
+      threat: 'Unauthorized actions', desc: 'Grounding data is fetched and actions are invoked. Overprivileged connectors can leak data or trigger unintended operations.' },
+    { id: 'synth',   label: 'Synthesize\nanswer', type: 'step', step: 5, icon: 'bot', risk: 'medium',
+      threat: 'Data leakage', desc: 'The final response is assembled. Sensitive data from grounding sources can leak into conversational output.' },
+    { id: 'end',     label: 'End',     type: 'terminal', nodeType: 'end', icon: 'square' },
+    // Orchestration layer nodes
+    { id: 'orch',    label: 'Language model or\nlogical code flow', type: 'orchestration', icon: 'brain' },
+    { id: 'tool',    label: 'Tool use', type: 'external', icon: 'wrench',
+      threat: 'Tool abuse', desc: 'External tool invocations cross trust boundaries. Unvalidated tool calls can execute with excessive permissions.' },
+    { id: 'data',    label: 'Data',    type: 'external', icon: 'database',
+      threat: 'Data exfiltration', desc: 'External data sources contain sensitive information. Insufficient access controls can expose data beyond the user\'s authorization scope.' }
+  ];
+
+  const edges = [
+    { id: 'e-start-prompt',  source: 'start',  target: 'prompt', label: 'User input' },
+    { id: 'e-prompt-intent', source: 'prompt', target: 'intent', label: 'Raw prompt' },
+    { id: 'e-intent-match',  source: 'intent', target: 'match',  label: 'Classified intent' },
+    { id: 'e-match-run',     source: 'match',  target: 'run',    label: 'Response handler' },
+    { id: 'e-run-synth',     source: 'run',    target: 'synth',  label: 'Grounded data' },
+    { id: 'e-synth-end',     source: 'synth',  target: 'end',    label: 'Response' },
+    // Orchestration ↔ steps (vertical bidirectional)
+    { id: 'e-orch-prompt',   source: 'orch',   target: 'prompt', label: '', edgeType: 'orch' },
+    { id: 'e-orch-intent',   source: 'orch',   target: 'intent', label: '', edgeType: 'orch' },
+    // Orchestration → external services (horizontal top row)
+    { id: 'e-orch-tool',     source: 'orch',   target: 'tool',   label: 'API calls', edgeType: 'toprow' },
+    { id: 'e-tool-data',     source: 'tool',   target: 'data',   label: 'Query',     edgeType: 'toprow' },
+    // Tool ↓ run (curved downward)
+    { id: 'e-data-match',    source: 'data',   target: 'match',  label: 'Results', edgeType: 'tool-down' },
+    // Run ↰ match (curved feedback going left)
+    { id: 'e-run-match',     source: 'run',    target: 'match',  label: 'Re-evaluate', edgeType: 'feedback' }
+  ];
+
+  // ── Build Cytoscape Elements ──
+  const elements = [];
+
+  // Compound parent node for boundary
+  elements.push({
+    group: 'nodes',
+    data: { id: 'boundary', label: 'Copilot Boundary', type: 'boundary' }
+  });
+
+  nodes.forEach(n => {
+    const nodeData = {
+      id: n.id,
+      label: n.label,
+      type: n.type,
+      nodeType: n.nodeType || n.type,
+      icon: n.icon || '',
+      step: n.step || 0,
+      risk: n.risk || 'none',
+      threat: n.threat || '',
+      desc: n.desc || '',
+      sub: n.sub || ''
+    };
+    // Only step nodes belong inside the Copilot Boundary
+    const boundaryNodes = ['prompt', 'intent', 'match', 'run', 'synth'];
+    if (boundaryNodes.includes(n.id)) {
+      nodeData.parent = 'boundary';
     }
-    steps.forEach((s) => s.classList.remove('dataflow-active'));
+    elements.push({
+      group: 'nodes',
+      data: nodeData,
+      position: positions[n.id] || { x: 0, y: 0 }
+    });
+  });
+
+  edges.forEach(e => {
+    elements.push({
+      group: 'edges',
+      data: {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        label: e.label || '',
+        edgeType: e.edgeType || 'main'
+      }
+    });
+  });
+
+  // ── Cytoscape Styles ──
+  const styles = [
+    {
+      selector: 'core',
+      style: {
+        'active-bg-color': '#1e293b',
+        'active-bg-opacity': 0.3,
+        'active-bg-size': 20,
+        'selection-box-color': 'rgba(59, 130, 246, 0.1)',
+        'selection-box-border-color': '#3b82f6',
+        'selection-box-border-width': 1
+      }
+    },
+    // All nodes transparent — HTML labels handle visuals
+    {
+      selector: 'node',
+      style: {
+        'shape': 'round-rectangle',
+        'background-color': 'transparent',
+        'background-opacity': 0,
+        'border-width': 0,
+        'label': '',
+        'width': 140,
+        'height': 90,
+        'overlay-padding': 15
+      }
+    },
+    // Boundary container
+    {
+      selector: 'node[type="boundary"]',
+      style: {
+        'shape': 'round-rectangle',
+        'background-color': '#0E141B',
+        'background-opacity': 0.5,
+        'border-width': 1.5,
+        'border-style': 'dashed',
+        'border-color': 'rgba(157, 131, 62, 0.3)',
+        'border-dash-pattern': [8, 6],
+        'padding': '40px',
+        'label': 'Copilot Boundary',
+        'color': 'rgba(157, 131, 62, 0.6)',
+        'font-size': '13px',
+        'font-weight': '600',
+        'font-family': 'Montserrat, sans-serif',
+        'text-valign': 'top',
+        'text-halign': 'center',
+        'text-margin-y': -20,
+        'text-transform': 'uppercase',
+        'min-width': '100px',
+        'min-height': '100px'
+      }
+    },
+    {
+      selector: 'node[nodeType="start"], node[nodeType="end"]',
+      style: { 'width': 56, 'height': 56 }
+    },
+    {
+      selector: 'node[type="orchestration"]',
+      style: { 'width': 210, 'height': 90 }
+    },
+    {
+      selector: 'node[type="external"]',
+      style: { 'width': 140, 'height': 90 }
+    },
+    // Main flow edges — white animated dashes
+    {
+      selector: 'edge[edgeType="main"]',
+      style: {
+        'width': 1.5,
+        'line-color': 'rgba(255, 255, 255, 0.6)',
+        'target-arrow-color': 'rgba(255, 255, 255, 0.6)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [8, 5],
+        'line-dash-offset': 0,
+        'label': '',
+        'source-distance-from-node': 8,
+        'target-distance-from-node': 8
+      }
+    },
+    // Orchestration edges — purple dashed bidirectional (vertical)
+    {
+      selector: 'edge[edgeType="orch"]',
+      style: {
+        'width': 2,
+        'line-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'source-arrow-shape': 'triangle',
+        'source-arrow-color': 'rgba(123, 94, 167, 0.5)',
+        'arrow-scale': 0.8,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [5, 4],
+        'label': '',
+        'source-distance-from-node': 5,
+        'target-distance-from-node': 5
+      }
+    },
+    // Top-row horizontal edges (orch→tool, tool→data)
+    {
+      selector: 'edge[edgeType="toprow"]',
+      style: {
+        'width': 2.5,
+        'line-color': 'rgba(255, 255, 255, 0.5)',
+        'target-arrow-color': 'rgba(255, 255, 255, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [7, 4],
+        'line-dash-offset': 0,
+        'label': 'data(label)',
+        'color': '#fbbf24',
+        'font-size': '9px',
+        'font-weight': '600',
+        'text-background-color': 'rgba(14, 20, 27, 0.92)',
+        'text-background-opacity': 1,
+        'text-background-padding': '4px',
+        'text-rotation': 'autorotate',
+        'source-distance-from-node': 6,
+        'target-distance-from-node': 6
+      }
+    },
+    // Tool ↓ run (curved downward from top row to bottom row)
+    {
+      selector: 'edge[edgeType="tool-down"]',
+      style: {
+        'width': 2,
+        'line-color': 'rgba(22, 171, 224, 0.5)',
+        'target-arrow-color': 'rgba(22, 171, 224, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1,
+        'curve-style': 'unbundled-bezier',
+        'control-point-distances': [-50],
+        'control-point-weights': [0.5],
+        'line-style': 'dashed',
+        'line-dash-pattern': [6, 4],
+        'line-dash-offset': 0,
+        'label': 'data(label)',
+        'color': 'rgba(22, 171, 224, 0.7)',
+        'font-size': '9px',
+        'font-weight': '600',
+        'text-background-color': 'rgba(14, 20, 27, 0.92)',
+        'text-background-opacity': 1,
+        'text-background-padding': '4px',
+        'text-rotation': 'autorotate',
+        'source-distance-from-node': 0,
+        'source-endpoint': '0% 50%',
+        'target-distance-from-node': 0,
+        'target-endpoint': '0% -50%'
+      }
+    },
+    // Feedback edges — run→match (curved going backward/left)
+    {
+      selector: 'edge[edgeType="feedback"]',
+      style: {
+        'width': 2,
+        'line-color': 'rgba(217, 61, 122, 0.5)',
+        'target-arrow-color': 'rgba(217, 61, 122, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1,
+        'curve-style': 'unbundled-bezier',
+        'control-point-distances': [-120],
+        'control-point-weights': [0.5],
+        'line-style': 'dashed',
+        'line-dash-pattern': [6, 4],
+        'line-dash-offset': 0,
+        'label': 'data(label)',
+        'color': 'rgba(217, 61, 122, 0.7)',
+        'font-size': '9px',
+        'font-weight': '600',
+        'text-background-color': 'rgba(14, 20, 27, 0.92)',
+        'text-background-opacity': 1,
+        'text-background-padding': '4px',
+        'text-rotation': 'autorotate',
+        'source-distance-from-node': 0,
+        'source-endpoint': '0% 50%',
+        'target-distance-from-node': 0,
+        'target-endpoint': '0% 50%'
+      }
+    },
+    // Selected node
+    {
+      selector: 'node:selected',
+      style: {
+        'border-width': 0,
+        'overlay-color': '#fbbf24',
+        'overlay-opacity': 0.08
+      }
+    },
+    // Selected edge
+    {
+      selector: 'edge:selected',
+      style: {
+        'width': 5,
+        'line-color': '#fbbf24',
+        'target-arrow-color': '#fbbf24'
+      }
+    },
+    // Dimmed elements
+    {
+      selector: '.dimmed',
+      style: {
+        'opacity': 0.12,
+        'transition-property': 'opacity',
+        'transition-duration': '0.3s'
+      }
+    },
+    // Highlighted edges
+    {
+      selector: '.highlighted',
+      style: {
+        'width': 5,
+        'line-color': '#00D9FF',
+        'target-arrow-color': '#00D9FF',
+        'source-arrow-color': '#00D9FF',
+        'opacity': 1,
+        'z-index': 999,
+        'transition-property': 'width, line-color, opacity',
+        'transition-duration': '0.3s'
+      }
+    }
+  ];
+
+  // ── Initialize Cytoscape ──
+  const cy = cytoscape({
+    container: container,
+    elements: elements,
+    style: styles,
+    layout: { name: 'preset' },
+    minZoom: 0.4,
+    maxZoom: 2.5,
+    userPanningEnabled: true,
+    userZoomingEnabled: true,
+    boxSelectionEnabled: false
+  });
+
+  // ── Apply preset layout and fit ──
+  cy.ready(() => {
+    cy.fit(40);
+    applyHTMLLabels(cy);
+  });
+
+  // ── HTML Node Labels ──
+  function applyHTMLLabels(cy) {
+    // Remove any existing labels
+    container.querySelectorAll('.cy-df-html-label').forEach(el => el.remove());
+
+    cy.nodes().forEach(node => {
+      const d = node.data();
+      // Skip boundary parent node
+      if (d.type === 'boundary') return;
+      const pos = node.renderedPosition();
+      const zoom = cy.zoom();
+
+      const typeClass = d.nodeType === 'start' ? 'type-start' :
+                        d.nodeType === 'end' ? 'type-end' :
+                        d.type === 'orchestration' ? 'type-orch' :
+                        d.type === 'external' ? 'type-external' : '';
+
+      const riskClass = d.risk === 'high' ? 'risk-high' :
+                        d.risk === 'medium' ? 'risk-medium' : '';
+
+      const isTerminal = d.nodeType === 'start' || d.nodeType === 'end';
+
+      let badgeHTML = '';
+      let shieldHTML = riskClass ? `<div class="cy-df-shield ${riskClass}"><i data-lucide="shield-alert" class="w-3 h-3"></i></div>` : '';
+      let subHTML = d.sub ? `<div class="cy-df-sublabel">${d.sub}</div>` : '';
+      let labelHTML = isTerminal ? '' : `<div class="cy-df-label">${d.label.replace(/\n/g, '<br>')}</div>`;
+      let iconSize = isTerminal ? 'w-5 h-5' : 'w-5 h-5';
+
+      const label = document.createElement('div');
+      label.className = 'cy-df-html-label';
+      label.dataset.nodeId = d.id;
+      label.innerHTML = `
+        <div class="cy-df-node">
+          <div class="cy-df-node-box ${typeClass}">
+            ${badgeHTML}
+            ${shieldHTML}
+            <div class="cy-df-icon"><i data-lucide="${d.icon}" class="${iconSize}"></i></div>
+            ${labelHTML}
+            ${subHTML}
+          </div>
+        </div>
+      `;
+
+      label.style.cssText = `
+        position: absolute;
+        pointer-events: none;
+        z-index: 15;
+        transform: translate(-50%, -50%);
+        left: ${pos.x}px;
+        top: ${pos.y}px;
+      `;
+
+      container.appendChild(label);
+    });
+
+    // Render Lucide icons inside the newly added HTML labels
+    if (window.lucide) lucide.createIcons();
   }
 
-  // Start cycling when diagram scrolls into view
+  // Update label positions on viewport change
+  function updateLabelPositions() {
+    cy.nodes().forEach(node => {
+      const pos = node.renderedPosition();
+      const label = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+      if (label) {
+        label.style.left = pos.x + 'px';
+        label.style.top = pos.y + 'px';
+        label.style.transform = `translate(-50%, -50%) scale(${Math.min(cy.zoom(), 1.5)})`;
+      }
+    });
+  }
+
+  cy.on('pan zoom resize', updateLabelPositions);
+
+  // Update individual label when a node is dragged
+  cy.on('position', 'node', (evt) => {
+    const node = evt.target;
+    const pos = node.renderedPosition();
+    const label = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+    if (label) {
+      label.style.left = pos.x + 'px';
+      label.style.top = pos.y + 'px';
+      label.style.transform = `translate(-50%, -50%) scale(${Math.min(cy.zoom(), 1.5)})`;
+    }
+  });
+
+  cy.on('layoutstop', () => {
+    updateLabelPositions();
+    cy.fit(50);
+  });
+
+  // ── Edge Animation — flowing dashed lines ──
+  let lastAnimTime = performance.now();
+  let dashOffset = 0;
+  const DASH_SPEED = 25;
+  let animFrameId = null;
+
+  function animateEdges() {
+    if (cy && !cy.destroyed()) {
+      const now = performance.now();
+      const dt = (now - lastAnimTime) / 1000;
+      lastAnimTime = now;
+      dashOffset = (dashOffset + DASH_SPEED * dt) % 13;
+      cy.edges().forEach(edge => {
+        edge.style('line-dash-offset', -dashOffset);
+      });
+      animFrameId = requestAnimationFrame(animateEdges);
+    }
+  }
+  animFrameId = requestAnimationFrame(animateEdges);
+
+  // ── Selection Highlight & Dim ──
+  function clearHighlight() {
+    cy.elements().removeClass('dimmed highlighted');
+    container.querySelectorAll('.cy-df-node.dimmed').forEach(el => el.classList.remove('dimmed'));
+  }
+
+  function highlightConnected(el) {
+    clearHighlight();
+    let connected;
+    if (el.isNode()) {
+      connected = el.connectedEdges().connectedNodes().union(el).union(el.connectedEdges());
+    } else {
+      connected = el.source().union(el.target()).union(el);
+    }
+    cy.elements().difference(connected).addClass('dimmed');
+    connected.edges().addClass('highlighted');
+
+    // Dim HTML labels for unconnected nodes
+    cy.nodes().forEach(n => {
+      const label = container.querySelector(`.cy-df-html-label[data-node-id="${n.data('id')}"]`);
+      if (label) {
+        const nodeDiv = label.querySelector('.cy-df-node');
+        if (nodeDiv) {
+          if (connected.contains(n)) {
+            nodeDiv.classList.remove('dimmed');
+          } else {
+            nodeDiv.classList.add('dimmed');
+          }
+        }
+      }
+    });
+  }
+
+  // ── Tooltip ──
+  const tooltip = document.getElementById('dataflow-tooltip');
+
+  function showTooltip(nodeData, event) {
+    if (!tooltip || !nodeData.threat) return;
+
+    const riskColor = nodeData.risk === 'high' ? '#EF4444' : nodeData.risk === 'medium' ? '#F59E0B' : '#22C55E';
+    const riskLabel = (nodeData.risk || 'low').charAt(0).toUpperCase() + (nodeData.risk || 'low').slice(1);
+
+    tooltip.innerHTML = `
+      <div class="dataflow-tooltip-title"><i data-lucide="${nodeData.icon}" class="w-4 h-4" style="display:inline-block;vertical-align:middle;margin-right:6px;"></i>${nodeData.label.replace(/\n/g, ' ')}</div>
+      <div class="dataflow-tooltip-row">
+        <span style="color: ${riskColor};">●</span>
+        <span class="label">Risk Level:</span>
+        <span class="value" style="color: ${riskColor};">${riskLabel}</span>
+      </div>
+      <div class="dataflow-tooltip-row">
+        <span style="color: #F59E0B;">⚠</span>
+        <span class="label">Primary Threat:</span>
+        <span class="value" style="color: #fbbf24;">${nodeData.threat}</span>
+      </div>
+      <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(100,116,139,0.2); font-size: 11px; color: #94a3b8; line-height: 1.5;">
+        ${nodeData.desc}
+      </div>
+    `;
+
+    const wrapperRect = document.getElementById('dataflow-wrapper').getBoundingClientRect();
+    const x = event.renderedPosition.x + 20;
+    const y = event.renderedPosition.y - 10;
+
+    tooltip.style.left = Math.min(x, wrapperRect.width - 360) + 'px';
+    tooltip.style.top = Math.max(y, 10) + 'px';
+    tooltip.classList.add('is-visible');
+  }
+
+  function hideTooltip() {
+    if (tooltip) tooltip.classList.remove('is-visible');
+  }
+
+  // ── Event Handlers ──
+  cy.on('tap', 'node', (evt) => {
+    const node = evt.target;
+    highlightConnected(node);
+    // Mark selected HTML label
+    container.querySelectorAll('.cy-df-node-box.selected').forEach(el => el.classList.remove('selected'));
+    const label = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+    if (label) {
+      const box = label.querySelector('.cy-df-node-box');
+      if (box) box.classList.add('selected');
+    }
+  });
+
+  cy.on('tap', (evt) => {
+    if (evt.target === cy) {
+      clearHighlight();
+      container.querySelectorAll('.cy-df-node-box.selected').forEach(el => el.classList.remove('selected'));
+      hideTooltip();
+    }
+  });
+
+  cy.on('mouseover', 'node', (evt) => {
+    const node = evt.target;
+    const d = node.data();
+    showTooltip(d, evt);
+    // Add hover class to HTML label
+    const lbl = container.querySelector(`.cy-df-html-label[data-node-id="${d.id}"]`);
+    if (lbl) { const box = lbl.querySelector('.cy-df-node-box'); if (box) box.classList.add('hovered'); }
+    // Hover edge highlight
+    node.connectedEdges().forEach(e => {
+      if (!e.hasClass('highlighted')) {
+        e.style({ 'width': e.data('edgeType') === 'main' ? 2.5 : 3 });
+      }
+    });
+  });
+
+  cy.on('mouseout', 'node', (evt) => {
+    const node = evt.target;
+    hideTooltip();
+    // Remove hover class from HTML label
+    const lbl = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+    if (lbl) { const box = lbl.querySelector('.cy-df-node-box'); if (box) box.classList.remove('hovered'); }
+    node.connectedEdges().forEach(e => {
+      if (!e.hasClass('highlighted')) {
+        const w = e.data('edgeType') === 'main' ? 1.5 : 2;
+        e.style({ 'width': w });
+      }
+    });
+  });
+
+  // ── Zoom Controls ──
+  const zoomIn = document.getElementById('df-zoom-in');
+  const zoomOut = document.getElementById('df-zoom-out');
+  const fitBtn = document.getElementById('df-fit');
+
+  if (zoomIn) zoomIn.addEventListener('click', () => cy.animate({ zoom: cy.zoom() * 1.3, duration: 200 }));
+  if (zoomOut) zoomOut.addEventListener('click', () => cy.animate({ zoom: cy.zoom() / 1.3, duration: 200 }));
+  if (fitBtn) fitBtn.addEventListener('click', () => cy.animate({ fit: { padding: 50 }, duration: 300 }));
+
+  // ── Start animation when in view, stop when not ──
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        startCycle();
+        if (!animFrameId) {
+          lastAnimTime = performance.now();
+          animFrameId = requestAnimationFrame(animateEdges);
+        }
       } else {
-        stopCycle();
-        activeIdx = 0;
+        if (animFrameId) {
+          cancelAnimationFrame(animFrameId);
+          animFrameId = null;
+        }
       }
     });
-  }, { threshold: 0.3 });
+  }, { threshold: 0.1 });
 
-  observer.observe(diagram);
+  observer.observe(container);
 
-  // Re-init Lucide icons for this section
+  // Re-init Lucide icons
   if (window.lucide) lucide.createIcons();
 }
