@@ -1096,6 +1096,21 @@ function initRiskList() {
     });
   });
 
+  // Staggered reveal animation
+  const riskObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(items).indexOf(entry.target);
+        setTimeout(() => {
+          entry.target.classList.add('risk-visible');
+        }, idx * 80);
+        riskObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+  items.forEach((item) => riskObserver.observe(item));
+
   // Re-init Lucide icons for risk section
   if (window.lucide) lucide.createIcons();
 }
