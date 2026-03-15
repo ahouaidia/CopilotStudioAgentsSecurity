@@ -59,7 +59,7 @@
       </a>
       <div class="flex items-center gap-6 nav-links-container nav-links-hero text-xs tracking-wide uppercase">
         <a href="#anatomy"         class="nav-link hover:text-brand-gold">Anatomy</a>
-        <a href="#attack-surface"  class="nav-link hover:text-brand-gold">Attack Surface</a>
+        <a href="#top10-risks"  class="nav-link hover:text-brand-gold">Top 10 Risks</a>
         <a href="#threat-modeling" class="nav-link hover:text-brand-gold">Threat Modeling</a>
         <a href="#defenses"        class="nav-link hover:text-brand-gold">Defenses</a>
         <a href="#labs"            class="nav-link hover:text-brand-gold">Labs</a>
@@ -536,21 +536,348 @@
   </section>
 
   <!-- ============================================================
-       SECTION 2 — ATTACK SURFACE (placeholder)
+       SECTION 2 — TOP 10 RISKS YOU CAN DETECT AND PREVENT
        ============================================================ -->
-  <section id="attack-surface" class="py-24 bg-brand-black">
+  <section id="top10-risks" class="py-24 bg-brand-black">
     <div class="max-w-6xl mx-auto px-6">
       <div class="reveal mb-16">
         <div class="section-accent mb-4"></div>
         <h2 class="font-heading text-3xl sm:text-4xl font-bold text-white">
-          Attack Surface
+          Top 10 Risks You Can Detect &amp; Prevent
         </h2>
-        <p class="mt-3 text-sm text-white/50 max-w-xl leading-relaxed">
-          Mapping the runtime risks across agent inputs, outputs, knowledge retrieval, and action execution.
+        <p class="mt-3 text-sm text-white/50 max-w-2xl leading-relaxed">
+          Common agent misconfigurations observed in real environments — and the controls to fix them.
+          <a href="https://www.microsoft.com/en-us/security/blog/2026/02/12/copilot-studio-agent-security-top-10-risks-detect-prevent/" target="_blank" rel="noopener noreferrer" class="text-brand-gold/60 hover:text-brand-gold underline underline-offset-2 ml-1">Source: Microsoft Security Blog</a>
         </p>
       </div>
-      <div class="reveal text-center py-20 text-white/20 text-sm uppercase tracking-widest">
-        — Content coming soon —
+
+      <div class="risk-list reveal" id="risk-list">
+
+        <!-- Risk 1 -->
+        <div class="risk-item" data-risk="1">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">1</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agent shared with entire organization or broad groups</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Unintended access, misuse, expanded attack surface</span>
+                <span class="risk-tag risk-tag-identity"><i data-lucide="shield-check" class="w-3 h-3"></i> Identity</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">Sharing an agent with your entire organization or broad security groups exposes its capabilities without proper access boundaries. Users unfamiliar with the agent's purpose might unintentionally trigger sensitive actions, and threat actors with minimal access could use the agent as an entry point.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Enable authentication (on by default)</li>
+                  <li>Configure agent sharing limits in Managed Environments</li>
+                  <li>Automatic security scan warnings at design-time and publish</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Query</div>
+                <code>AI Agents – Organization or Multitenant Shared</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 2 -->
+        <div class="risk-item" data-risk="2">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">2</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agents that do not require authentication</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Public exposure, unauthorized access, data leakage</span>
+                <span class="risk-tag risk-tag-identity"><i data-lucide="shield-check" class="w-3 h-3"></i> Identity</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">Agents accessible without authentication create a significant exposure point. When publicly reachable, anyone with the link can use its capabilities. Topics, actions, or knowledge sources might unintentionally reveal internal information. This gap appears because authentication was deactivated for testing, left in its default state, or misunderstood as optional.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Enforce agent authentication at the environment level</li>
+                  <li>Automatic security scan warnings at design-time and publish</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Query</div>
+                <code>AI Agents – No Authentication Required</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 3 -->
+        <div class="risk-item" data-risk="3">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">3</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agents with HTTP Request actions using risky configurations</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Governance bypass, insecure communications, unintended API access</span>
+                <span class="risk-tag risk-tag-tools"><i data-lucide="wrench" class="w-3 h-3"></i> Tools</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">Agents performing direct HTTP requests targeting non-standard ports, insecure schemes, or sensitive services bypass the governance, validation, throttling, and identity controls that connectors provide. Makers might copy a sample request, test an internal endpoint, or use HTTP actions for flexibility, leading to agents issuing unsecured calls.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Apply data policies / advanced connector policies per environment</li>
+                  <li>Communicate best practices in Maker welcome content</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Queries</div>
+                <code>AI Agents – HTTP Requests to connector endpoints</code>
+                <code>AI Agents – HTTP Requests to nonHTTPS endpoints</code>
+                <code>AI Agents – HTTP Requests to nonstandard ports</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 4 -->
+        <div class="risk-item" data-risk="4">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">4</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agents capable of email-based data exfiltration</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Data exfiltration via prompt injection or misconfiguration</span>
+                <span class="risk-tag risk-tag-tools"><i data-lucide="wrench" class="w-3 h-3"></i> Tools</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">When an agent uses generative orchestration to send email, the orchestrator determines the recipient and message content at runtime. In a successful indirect prompt injection attack, a threat actor could instruct the agent to send internal data to external recipients. Because email is an immediate outbound channel, any misconfiguration can lead to unmonitored data exposure.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Implement Microsoft Defender Real-time Protection</li>
+                  <li>Disable specific actions with connector action control</li>
+                  <li>Use human-in-the-loop approvals for high-risk operations</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Queries</div>
+                <code>AI Agents – Sending email to AI-controlled input values</code>
+                <code>AI Agents – Sending email to external mailboxes</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 5 -->
+        <div class="risk-item" data-risk="5">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">5</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Dormant connections, actions, or agents</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Hidden attack surface, stale privileged access</span>
+                <span class="risk-tag risk-tag-orchestrator"><i data-lucide="brain-circuit" class="w-3 h-3"></i> Orchestrator</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">Unmonitored entry points often lack active ownership. A published but unused agent can still be called. A dormant maker-authenticated action might trigger elevated operations. Unused actions in classic orchestration can expose sensitive connectors if activated. These assets fall outside normal operational visibility while teams focus on active agents.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Review agents in Power Platform Inventory</li>
+                  <li>Quarantine agents flagged for deprecation</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Queries</div>
+                <code>AI Agents – Published Dormant (30d)</code>
+                <code>AI Agents – Unpublished Unmodified (30d)</code>
+                <code>AI Agents – Unused Actions</code>
+                <code>AI Agents – Dormant Author Authentication Connection</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 6 -->
+        <div class="risk-item" data-risk="6">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">6</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agents using author (maker) authentication</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Privilege escalation, separation of duties bypass</span>
+                <span class="risk-tag risk-tag-identity"><i data-lucide="shield-check" class="w-3 h-3"></i> Identity</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">When agents use maker's personal authentication, they act on behalf of the creator rather than the end user. Every user inherits the maker's permissions. If those include access to sensitive data or high-impact connectors, the agent becomes a path for privilege escalation. MCP tools with maker credentials allow threat actors to trigger operations relying directly on the creator's identity.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Restrict maker-provided credentials</li>
+                  <li>Automatic security scan warnings at design-time and publish</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Queries</div>
+                <code>AI Agents – Published Agents with Author Authentication</code>
+                <code>AI Agents – MCP Tool with Maker Credentials</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 7 -->
+        <div class="risk-item" data-risk="7">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">7</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agents containing hardcoded credentials</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Credential leakage, unauthorized system access</span>
+                <span class="risk-tag risk-tag-topics"><i data-lucide="route" class="w-3 h-3"></i> Topics</span>
+                <span class="risk-tag risk-tag-tools"><i data-lucide="wrench" class="w-3 h-3"></i> Tools</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">Clear-text secrets embedded in agent logic can be read, copied, or extracted by unintended users or automated systems. This often occurs when makers paste API keys, authentication tokens, or connection strings during development. These credentials bypass standard Key Vault policies, environment variable isolation, and are not rotated.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Store secrets in Azure Key Vault, referencing as environment variables</li>
+                  <li>Communicate best practices in Maker welcome content</li>
+                  <li>Managed environments: Sharing Limits, Deployment Pipelines with gated extensions</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Query</div>
+                <code>AI Agents – Hardcoded Credentials in Topics or Actions</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 8 -->
+        <div class="risk-item" data-risk="8">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">8</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agents with Model Context Protocol (MCP) tools configured</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Undocumented access paths, unintended system interactions</span>
+                <span class="risk-tag risk-tag-tools"><i data-lucide="wrench" class="w-3 h-3"></i> Tools</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">MCP tools provide a powerful way to integrate with external systems, but if not actively maintained or reviewed, they can introduce undocumented access patterns. Unmonitored MCP tools might expose capabilities that exceed the agent's intended purpose, especially if they allow access to privileged operations or sensitive data sources.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Manage available MCP tooling with Data Policies</li>
+                  <li>Apply Advanced Connector Policies</li>
+                  <li>Review Power Platform Inventory for dormant MCP integrations</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Query</div>
+                <code>AI Agents – MCP Tool Configured</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 9 -->
+        <div class="risk-item" data-risk="9">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">9</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Agents with generative orchestration lacking instructions</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Prompt abuse, behavior drift, unintended actions</span>
+                <span class="risk-tag risk-tag-topics"><i data-lucide="route" class="w-3 h-3"></i> Topics</span>
+                <span class="risk-tag risk-tag-orchestrator"><i data-lucide="brain-circuit" class="w-3 h-3"></i> Orchestrator</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">Instructions are the primary way to align a generative model with its intended purpose. Without them, the orchestrator lacks context to limit its output. A lack of guidance can cause agents to drift from expected behaviors, follow unexpected logic paths, or interact with connected systems in unintended ways.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Communicate Best Practices for agent instructions</li>
+                  <li>Azure Prompt Shield &amp; RAI guardrails (on by default)</li>
+                  <li>Implement Microsoft Defender Real-time Protection</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Query</div>
+                <code>AI Agents – Published Generative Orchestration without Instructions</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk 10 -->
+        <div class="risk-item" data-risk="10">
+          <button class="risk-header" type="button" aria-expanded="false">
+            <div class="risk-num">10</div>
+            <div class="risk-info">
+              <h3 class="risk-title">Orphaned agents (no active owner)</h3>
+              <div class="risk-meta">
+                <span class="risk-impact">Lack of governance, outdated logic, unmanaged access</span>
+                <span class="risk-tag risk-tag-orchestrator"><i data-lucide="brain-circuit" class="w-3 h-3"></i> Orchestrator</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-down" class="risk-chevron w-5 h-5"></i>
+          </button>
+          <div class="risk-details">
+            <div class="risk-details-inner">
+              <p class="risk-desc">Orphaned agents whose owners are no longer with the organization or have deactivated accounts continue to run, interact with users, or access data without an accountable individual. They bypass standard review cycles and often contain outdated logic, deprecated connections, or sensitive access patterns that don't align with current requirements.</p>
+              <div class="risk-controls">
+                <div class="risk-controls-title"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Mitigating Controls</div>
+                <ul class="risk-controls-list">
+                  <li>Check inventory for stale agents</li>
+                  <li>Quarantine agents to be decommissioned</li>
+                  <li>Reassign ownership or delete orphaned agents</li>
+                </ul>
+              </div>
+              <div class="risk-queries">
+                <div class="risk-queries-title"><i data-lucide="search" class="w-3.5 h-3.5"></i> Advanced Hunting Query</div>
+                <code>AI Agents – Orphaned Agents with Disabled Owners</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>

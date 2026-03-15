@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDetailPanel();
   initLensToggle();
   initAttackChainSimulation();
+  initRiskList();
 });
 
 /* -------------------------------------------------------
@@ -1065,4 +1066,36 @@ function initConnectionTooltips() {
       }
     });
   });
+}
+
+/* -------------------------------------------------------
+   TOP 10 RISKS — Accordion expand/collapse
+------------------------------------------------------- */
+function initRiskList() {
+  const items = document.querySelectorAll('.risk-item');
+  if (!items.length) return;
+
+  items.forEach((item) => {
+    const header = item.querySelector('.risk-header');
+    if (!header) return;
+
+    header.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+
+      // Close all other items
+      items.forEach((other) => {
+        if (other !== item && other.classList.contains('open')) {
+          other.classList.remove('open');
+          other.querySelector('.risk-header').setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Toggle current
+      item.classList.toggle('open', !isOpen);
+      header.setAttribute('aria-expanded', String(!isOpen));
+    });
+  });
+
+  // Re-init Lucide icons for risk section
+  if (window.lucide) lucide.createIcons();
 }
