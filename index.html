@@ -199,6 +199,59 @@
         </p>
       </div>
 
+      <!-- Spectrum of Agent Capabilities -->
+      <div class="reveal mb-16">
+        <div class="spectrum-container">
+          <h3 class="spectrum-title">Spectrum of Copilot Studio Agent Capabilities</h3>
+
+          <!-- Gradient bar + cards -->
+          <div class="spectrum-track-wrapper">
+            <!-- Gradient bar with embedded label -->
+            <div class="spectrum-bar">
+              <span class="spectrum-bar-label">Risk Level</span>
+              <i data-lucide="arrow-right" class="spectrum-bar-arrow w-4 h-4"></i>
+              <div class="spectrum-threats" id="spectrum-threats">
+                <span class="spectrum-threat">Data Oversharing</span>
+                <span class="spectrum-threat">Data Exfiltration</span>
+                <span class="spectrum-threat">Unsafe Orchestration</span>
+                <span class="spectrum-threat">Indirect Prompt Injection</span>
+              </div>
+            </div>
+
+            <!-- Three stage cards -->
+            <div class="spectrum-stages">
+              <div class="spectrum-stage spectrum-stage-retrieval" data-stage="1">
+                <div class="spectrum-icon-ring spectrum-icon-retrieval">
+                  <i data-lucide="message-circle-question" class="w-6 h-6"></i>
+                </div>
+                <h4 class="spectrum-stage-name spectrum-name-retrieval">Retrieval</h4>
+                <p class="spectrum-stage-desc">Retrieve information from grounding data, reason, summarize, and answer user questions</p>
+              </div>
+              <div class="spectrum-stage spectrum-stage-task" data-stage="2">
+                <div class="spectrum-icon-ring spectrum-icon-task">
+                  <i data-lucide="workflow" class="w-6 h-6"></i>
+                </div>
+                <h4 class="spectrum-stage-name spectrum-name-task">Task</h4>
+                <p class="spectrum-stage-desc">Take actions when asked, automate workflows, and replace repetitive tasks for users</p>
+              </div>
+              <div class="spectrum-stage spectrum-stage-autonomous" data-stage="3">
+                <div class="spectrum-icon-ring spectrum-icon-autonomous">
+                  <i data-lucide="bot" class="w-6 h-6"></i>
+                </div>
+                <h4 class="spectrum-stage-name spectrum-name-autonomous">Autonomous</h4>
+                <p class="spectrum-stage-desc">Operate independently, dynamically plan, orchestrate other agents, learn and escalate</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom caption -->
+          <div class="spectrum-caption">
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+            <span>Agents vary in levels of complexity and capabilities</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Hub-Spoke Architecture Diagram -->
       <div class="reveal mb-8">
         <div class="hub-container" id="hub-container">

@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLensToggle();
   initAttackChainSimulation();
   initRiskList();
+  initSpectrum();
 });
 
 /* -------------------------------------------------------
@@ -1113,4 +1114,75 @@ function initRiskList() {
 
   // Re-init Lucide icons for risk section
   if (window.lucide) lucide.createIcons();
+}
+
+/* -------------------------------------------------------
+   SPECTRUM — Scroll-triggered animation
+------------------------------------------------------- */
+function initSpectrum() {
+  const container = document.querySelector('.spectrum-container');
+  if (!container) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        container.classList.add('spectrum-animated');
+        startThreatCycle();
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  observer.observe(container);
+}
+
+function startThreatCycle() {
+  const threats = document.querySelectorAll('.spectrum-threat');
+  if (!threats.length) return;
+
+  // Fixed positions spread across the bar (% of container width)
+  const positions = [
+    { left: '2%' },
+    { left: '25%' },
+    { left: '48%' },
+    { left: '68%' }
+  ];
+
+  // Stagger offsets so labels overlap in time
+  const VISIBLE_DURATION = 2200;
+  const STAGGER = 900;
+  const FADE_OUT = 600;
+
+  function animateOne(idx) {
+    const el = threats[idx];
+    const pos = positions[idx];
+
+    // Position
+    el.style.left = pos.left;
+
+    // Fade in
+    el.classList.remove('threat-out');
+    el.classList.add('threat-in');
+
+    // Fade out after visible duration
+    setTimeout(() => {
+      el.classList.remove('threat-in');
+      el.classList.add('threat-out');
+    }, VISIBLE_DURATION);
+  }
+
+  function runWave() {
+    threats.forEach((t, i) => {
+      setTimeout(() => animateOne(i), i * STAGGER);
+    });
+  }
+
+  // Full cycle = last stagger + visible + fade out + pause
+  const CYCLE = (threats.length - 1) * STAGGER + VISIBLE_DURATION + FADE_OUT + 600;
+
+  // Start after bar animation
+  setTimeout(() => {
+    runWave();
+    setInterval(runWave, CYCLE);
+  }, 1200);
 }
