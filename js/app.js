@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSpectrum();
   initPlaybook();
   initDataFlow();
+  initTMParticles();
 });
 
 /* -------------------------------------------------------
@@ -1264,6 +1265,237 @@ function initPlaybook() {
    DATA FLOW DIAGRAM — Cytoscape Interactive Graph
    Adapted from DFDReviewQueue.jsx Cytoscape patterns
 ------------------------------------------------------- */
+/* -------------------------------------------------------
+   THREAT MODELING — Animated Network Particles (light bg)
+------------------------------------------------------- */
+function initTMParticles() {
+  const container = document.getElementById('tm-particles');
+  if (!container) return;
+
+  const canvas = document.createElement('canvas');
+  container.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const COLORS = {
+    gold:      { r: 130, g: 108, b: 46 },
+    blue:      { r: 18,  g: 140, b: 184 },
+    turquoise: { r: 0,   g: 144, b: 134 },
+    purple:    { r: 100, g: 70,  b: 140 },
+  };
+
+  const NODE_COUNT = 45;
+  const CONNECTION_DIST = 160;
+  const PACKET_SPEED = 0.6;
+  const EDGE_MARGIN = 40;
+
+  let width, height, dpr;
+  let nodes = [];
+  let packets = [];
+  let mouse = { x: 0, y: 0 };
+  let animationId;
+  let time = 0;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = container.offsetWidth;
+    height = container.offsetHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function edgeAlpha(x, y) {
+    let a = 1;
+    if (x < EDGE_MARGIN) a *= x / EDGE_MARGIN;
+    else if (x > width - EDGE_MARGIN) a *= (width - x) / EDGE_MARGIN;
+    if (y < EDGE_MARGIN) a *= y / EDGE_MARGIN;
+    else if (y > height - EDGE_MARGIN) a *= (height - y) / EDGE_MARGIN;
+    return Math.max(0, a);
+  }
+
+  function createNode() {
+    const palette = [COLORS.gold, COLORS.blue, COLORS.turquoise, COLORS.purple];
+    const color = palette[Math.floor(Math.random() * palette.length)];
+    const isSecure = Math.random() < 0.12;
+    return {
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      baseSize: isSecure ? 3.2 : (Math.random() * 1.8 + 1),
+      color: color,
+      isSecure: isSecure,
+      pulse: Math.random() * Math.PI * 2,
+    };
+  }
+
+  function createPacket(fromNode, toNode) {
+    return { from: fromNode, to: toNode, progress: 0, speed: PACKET_SPEED + Math.random() * 0.3, color: COLORS.purple, alive: true };
+  }
+
+  function drawHex(cx, cy, r, alpha, color) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i - Math.PI / 6;
+      const hx = cx + r * Math.cos(angle);
+      const hy = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (alpha * 0.7) + ')';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (alpha * 0.15) + ')';
+    ctx.fill();
+  }
+
+  function drawNode(node) {
+    const a = edgeAlpha(node.x, node.y);
+    if (a <= 0) return;
+    const pulseScale = 1 + 0.15 * Math.sin(time * 0.02 + node.pulse);
+    const size = node.baseSize * pulseScale;
+    const c = node.color;
+    if (node.isSecure) {
+      drawHex(node.x, node.y, size * 2.2, a, c);
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, size * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (a * 0.8) + ')';
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (a * 0.55) + ')';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, size + 1.5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (a * 0.12) + ')';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  }
+
+  function drawConnections() {
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONNECTION_DIST) {
+          const strength = 1 - dist / CONNECTION_DIST;
+          const aI = edgeAlpha(nodes[i].x, nodes[i].y);
+          const aJ = edgeAlpha(nodes[j].x, nodes[j].y);
+          const a = Math.min(aI, aJ) * strength;
+          if (a < 0.01) continue;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = 'rgba(' + COLORS.gold.r + ',' + COLORS.gold.g + ',' + COLORS.gold.b + ',' + (a * 0.18) + ')';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function spawnPackets() {
+    if (Math.random() > 0.025 || packets.length > 20) return;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const a = nodes[Math.floor(Math.random() * nodes.length)];
+      const b = nodes[Math.floor(Math.random() * nodes.length)];
+      if (a === b) continue;
+      const dx = a.x - b.x, dy = a.y - b.y;
+      if (Math.sqrt(dx * dx + dy * dy) < CONNECTION_DIST) {
+        packets.push(createPacket(a, b));
+        break;
+      }
+    }
+  }
+
+  function updateAndDrawPackets() {
+    for (let i = packets.length - 1; i >= 0; i--) {
+      const p = packets[i];
+      p.progress += p.speed * 0.015;
+      if (p.progress >= 1) { packets.splice(i, 1); continue; }
+      const x = p.from.x + (p.to.x - p.from.x) * p.progress;
+      const y = p.from.y + (p.to.y - p.from.y) * p.progress;
+      const a = edgeAlpha(x, y);
+      if (a <= 0) continue;
+      const packetAlpha = a * (1 - Math.abs(p.progress - 0.5) * 0.6);
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + COLORS.purple.r + ',' + COLORS.purple.g + ',' + COLORS.purple.b + ',' + (packetAlpha * 0.9) + ')';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + COLORS.purple.r + ',' + COLORS.purple.g + ',' + COLORS.purple.b + ',' + (packetAlpha * 0.15) + ')';
+      ctx.fill();
+    }
+  }
+
+  function updateNodes() {
+    for (const node of nodes) {
+      const mdx = node.x - (mouse.x + width / 2);
+      const mdy = node.y - (mouse.y + height / 2);
+      const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+      if (mouse.x !== 0 && mouse.y !== 0 && mDist < 150) {
+        const force = (150 - mDist) / 150 * 0.3;
+        node.vx += (mdx / mDist) * force;
+        node.vy += (mdy / mDist) * force;
+      }
+      node.vx *= 0.98;
+      node.vy *= 0.98;
+      node.x += node.vx;
+      node.y += node.vy;
+      if (node.x < -20) node.x = width + 20;
+      else if (node.x > width + 20) node.x = -20;
+      if (node.y < -20) node.y = height + 20;
+      else if (node.y > height + 20) node.y = -20;
+    }
+  }
+
+  function animate() {
+    time++;
+    ctx.clearRect(0, 0, width, height);
+    updateNodes();
+    drawConnections();
+    for (const node of nodes) drawNode(node);
+    spawnPackets();
+    updateAndDrawPackets();
+    animationId = requestAnimationFrame(animate);
+  }
+
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, createNode);
+    packets = [];
+    animate();
+  }
+
+  container.addEventListener('mousemove', function(e) {
+    const rect = container.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left - width / 2;
+    mouse.y = e.clientY - rect.top - height / 2;
+  });
+
+  container.addEventListener('mouseleave', function() {
+    mouse.x = 0;
+    mouse.y = 0;
+  });
+
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      cancelAnimationFrame(animationId);
+      init();
+    }, 200);
+  });
+
+  init();
+}
+
 function initDataFlow() {
   const container = document.getElementById('dataflow-cy');
   if (!container) return;
