@@ -1632,7 +1632,40 @@ function initDataFlow() {
   // ── Apply preset layout and fit ──
   cy.ready(() => {
     cy.fit(40);
-    applyHTMLLabels(cy);
+
+    // Start all elements hidden
+    cy.elements().style('opacity', 0);
+
+    // Staggered entrance: boundary first, then nodes left→right, then edges
+    const boundary = cy.nodes('[type="boundary"]');
+    const childNodes = cy.nodes().filter(n => n.data('type') !== 'boundary');
+    const sortedNodes = childNodes.sort((a, b) => a.position('x') - b.position('x'));
+
+    // 1. Fade in boundary
+    boundary.animate({ style: { opacity: 1 } }, { duration: 400, easing: 'ease-out' });
+
+    // 2. Stagger nodes with slide-up effect
+    sortedNodes.forEach((node, i) => {
+      const origY = node.position('y');
+      node.position('y', origY + 30);
+      setTimeout(() => {
+        node.animate(
+          { position: { y: origY }, style: { opacity: 1 } },
+          { duration: 500, easing: 'ease-out' }
+        );
+      }, 200 + i * 80);
+    });
+
+    // 3. Fade in edges after nodes
+    const edgeDelay = 200 + sortedNodes.length * 80 + 200;
+    setTimeout(() => {
+      cy.edges().animate({ style: { opacity: 1 } }, { duration: 600, easing: 'ease-out' });
+    }, edgeDelay);
+
+    // 4. Apply HTML labels once first node starts animating
+    setTimeout(() => {
+      applyHTMLLabels(cy);
+    }, 200);
   });
 
   // ── HTML Node Labels ──
@@ -1685,9 +1718,17 @@ function initDataFlow() {
         transform: translate(-50%, -50%);
         left: ${pos.x}px;
         top: ${pos.y}px;
+        opacity: 0;
+        transition: opacity 0.5s ease;
       `;
 
       container.appendChild(label);
+
+      // Stagger label fade-in matching Cytoscape node order (left→right by x)
+      const sortOrder = ['start','prompt','orch','intent','match','tool','run','data','synth','end'];
+      const nodeIdx = sortOrder.indexOf(d.id);
+      const delay = 200 + Math.max(0, nodeIdx) * 80;
+      setTimeout(() => { label.style.opacity = '1'; }, delay);
     });
 
     // Render Lucide icons inside the newly added HTML labels
