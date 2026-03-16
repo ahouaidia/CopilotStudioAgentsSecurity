@@ -1300,13 +1300,13 @@ function initDataFlow() {
     tool:   { x: 760, y: 110 },
     data:   { x: 1080, y: 110 },
     // Hidden tool sub-nodes (above tool)
-    'api-plugin':     { x: 600, y: -60 },
-    'mcp-server':     { x: 760, y: -60 },
-    'agent-to-agent': { x: 920, y: -60 },
+    'api-plugin':     { x: 500, y: -60 },
+    'mcp-server':     { x: 660, y: -60 },
+    'agent-to-agent': { x: 820, y: -60 },
     // Hidden data sub-nodes (above data)
-    'semantic-index':    { x: 920, y: -60 },
-    'structured-db':     { x: 1080, y: -60 },
-    'custom-semantic':   { x: 1240, y: -60 }
+    'semantic-index':    { x: 1080, y: -60 },
+    'structured-db':     { x: 1240, y: -60 },
+    'custom-semantic':   { x: 1400, y: -60 }
   };
 
   // ── Node & Edge Data Model ──
