@@ -2714,6 +2714,28 @@ h1, h2, h3, h4, h5, h6 {
   color: #fff;
 }
 
+/* Tools toggle button */
+.df-tools-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  width: auto !important;
+  padding: 0 14px !important;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.df-tools-btn.active {
+  border-color: rgba(123, 94, 167, 0.5);
+  background: rgba(123, 94, 167, 0.18);
+  color: var(--brand-purple);
+  box-shadow: 0 0 12px rgba(123, 94, 167, 0.15);
+}
+
 /* Tooltip */
 .dataflow-tooltip {
   display: none;
@@ -2822,6 +2844,11 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(135deg, rgba(123, 94, 167, 0.14) 0%, rgba(123, 94, 167, 0.04) 100%);
 }
 
+.cy-df-node-box.type-tool-child {
+  border-color: rgba(123, 94, 167, 0.35);
+  background: linear-gradient(135deg, rgba(123, 94, 167, 0.12) 0%, rgba(123, 94, 167, 0.03) 100%);
+}
+
 /* Step number badge */
 .cy-df-badge {
   position: absolute;
@@ -2911,6 +2938,8 @@ h1, h2, h3, h4, h5, h6 {
 .type-orch .cy-df-label { color: var(--brand-blue); }
 .type-external .cy-df-icon { color: var(--brand-purple); }
 .type-external .cy-df-label { color: var(--brand-purple); }
+.type-tool-child .cy-df-icon { color: var(--brand-purple); }
+.type-tool-child .cy-df-label { color: var(--brand-purple); }
 
 /* Hover state — solid background + subtle bump */
 .cy-df-node-box.hovered {

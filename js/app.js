@@ -1298,7 +1298,11 @@ function initDataFlow() {
     end:    { x: 1060, y: 430 },
     orch:   { x: 380, y: 110 },
     tool:   { x: 760, y: 110 },
-    data:   { x: 1080, y: 110 }
+    data:   { x: 1080, y: 110 },
+    // Hidden tool sub-nodes (below tool)
+    'api-plugin':     { x: 600, y: -60 },
+    'mcp-server':     { x: 760, y: -60 },
+    'agent-to-agent': { x: 920, y: -60 }
   };
 
   // ── Node & Edge Data Model ──
@@ -1320,7 +1324,11 @@ function initDataFlow() {
     { id: 'tool',    label: 'Tool use', type: 'external', icon: 'wrench',
       threat: 'Tool abuse', desc: 'External tool invocations cross trust boundaries. Unvalidated tool calls can execute with excessive permissions.' },
     { id: 'data',    label: 'Data',    type: 'external', icon: 'database',
-      threat: 'Data exfiltration', desc: 'External data sources contain sensitive information. Insufficient access controls can expose data beyond the user\'s authorization scope.' }
+      threat: 'Data exfiltration', desc: 'External data sources contain sensitive information. Insufficient access controls can expose data beyond the user\'s authorization scope.' },
+    // Tool sub-nodes (hidden initially)
+    { id: 'api-plugin',     label: 'API plugin',       type: 'tool-child', icon: 'plug', parent: 'tools-boundary' },
+    { id: 'mcp-server',     label: 'MCP server',       type: 'tool-child', icon: 'server', parent: 'tools-boundary' },
+    { id: 'agent-to-agent', label: 'Agent-to-agent',   type: 'tool-child', icon: 'users', parent: 'tools-boundary' }
   ];
 
   const edges = [
@@ -1341,7 +1349,11 @@ function initDataFlow() {
     // Tool ↓ run (curved downward)
     { id: 'e-data-match',    source: 'data',   target: 'match',  label: 'Results', edgeType: 'tool-down' },
     // Run ↰ match (curved feedback going left)
-    { id: 'e-run-match',     source: 'run',    target: 'match',  label: 'Re-evaluate', edgeType: 'feedback' }
+    { id: 'e-run-match',     source: 'run',    target: 'match',  label: 'Re-evaluate', edgeType: 'feedback' },
+    // Tool → sub-nodes (hidden initially)
+    { id: 'e-tool-api',     source: 'tool', target: 'api-plugin',     label: '', edgeType: 'tool-child' },
+    { id: 'e-tool-mcp',     source: 'tool', target: 'mcp-server',     label: '', edgeType: 'tool-child' },
+    { id: 'e-tool-agent',   source: 'tool', target: 'agent-to-agent', label: '', edgeType: 'tool-child' }
   ];
 
   // ── Build Cytoscape Elements ──
@@ -1351,6 +1363,12 @@ function initDataFlow() {
   elements.push({
     group: 'nodes',
     data: { id: 'boundary', label: 'Copilot Boundary', type: 'boundary' }
+  });
+
+  // Compound parent for tools boundary (hidden initially)
+  elements.push({
+    group: 'nodes',
+    data: { id: 'tools-boundary', label: 'Actions and Tools', type: 'tools-boundary' }
   });
 
   nodes.forEach(n => {
@@ -1370,6 +1388,10 @@ function initDataFlow() {
     const boundaryNodes = ['prompt', 'intent', 'match', 'run', 'synth'];
     if (boundaryNodes.includes(n.id)) {
       nodeData.parent = 'boundary';
+    }
+    // Tool-child nodes belong inside Tools boundary
+    if (n.type === 'tool-child') {
+      nodeData.parent = 'tools-boundary';
     }
     elements.push({
       group: 'nodes',
@@ -1441,6 +1463,58 @@ function initDataFlow() {
         'text-transform': 'uppercase',
         'min-width': '100px',
         'min-height': '100px'
+      }
+    },
+    // Tools boundary container (hidden initially)
+    {
+      selector: 'node[type="tools-boundary"]',
+      style: {
+        'shape': 'round-rectangle',
+        'background-color': '#0E141B',
+        'background-opacity': 0.5,
+        'border-width': 1.5,
+        'border-style': 'dashed',
+        'border-color': 'rgba(123, 94, 167, 0.3)',
+        'border-dash-pattern': [8, 6],
+        'padding': '40px',
+        'label': 'Actions and Tools',
+        'color': 'rgba(123, 94, 167, 0.6)',
+        'font-size': '13px',
+        'font-weight': '600',
+        'font-family': 'Montserrat, sans-serif',
+        'text-valign': 'top',
+        'text-halign': 'center',
+        'text-margin-y': -20,
+        'text-transform': 'uppercase',
+        'min-width': '100px',
+        'min-height': '100px',
+        'display': 'none'
+      }
+    },
+    // Tool child nodes
+    {
+      selector: 'node[type="tool-child"]',
+      style: {
+        'width': 130,
+        'height': 80,
+        'display': 'none'
+      }
+    },
+    // Tool child edges (hidden initially)
+    {
+      selector: 'edge[edgeType="tool-child"]',
+      style: {
+        'width': 2,
+        'line-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 0.8,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [5, 4],
+        'source-endpoint': '0 -50%',
+        'target-endpoint': '0 50%',
+        'display': 'none'
       }
     },
     {
@@ -1657,12 +1731,17 @@ function initDataFlow() {
   cy.ready(() => {
     cy.fit(40);
 
-    // Start all elements hidden
-    cy.elements().style('opacity', 0);
+    // Start all visible elements hidden (tool-child elements stay display:none)
+    const visibleElements = cy.elements().filter(el =>
+      el.data('type') !== 'tools-boundary' &&
+      el.data('type') !== 'tool-child' &&
+      el.data('edgeType') !== 'tool-child'
+    );
+    visibleElements.style('opacity', 0);
 
     // Staggered entrance: boundary first, then nodes left→right, then edges
     const boundary = cy.nodes('[type="boundary"]');
-    const childNodes = cy.nodes().filter(n => n.data('type') !== 'boundary');
+    const childNodes = visibleElements.nodes().filter(n => n.data('type') !== 'boundary');
     const sortedNodes = childNodes.sort((a, b) => a.position('x') - b.position('x'));
 
     // 1. Fade in boundary
@@ -1680,10 +1759,10 @@ function initDataFlow() {
       }, 200 + i * 80);
     });
 
-    // 3. Fade in edges after nodes
+    // 3. Fade in edges after nodes (excluding tool-child edges)
     const edgeDelay = 200 + sortedNodes.length * 80 + 200;
     setTimeout(() => {
-      cy.edges().animate({ style: { opacity: 1 } }, { duration: 600, easing: 'ease-out' });
+      cy.edges().filter(e => e.data('edgeType') !== 'tool-child').animate({ style: { opacity: 1 } }, { duration: 600, easing: 'ease-out' });
     }, edgeDelay);
 
     // 4. Apply HTML labels once first node starts animating
@@ -1699,8 +1778,8 @@ function initDataFlow() {
 
     cy.nodes().forEach(node => {
       const d = node.data();
-      // Skip boundary parent node
-      if (d.type === 'boundary') return;
+      // Skip boundary parent nodes and tool-child nodes (handled by toggle)
+      if (d.type === 'boundary' || d.type === 'tools-boundary' || d.type === 'tool-child') return;
       const pos = node.renderedPosition();
       const zoom = cy.zoom();
 
@@ -1941,6 +2020,118 @@ function initDataFlow() {
   if (zoomIn) zoomIn.addEventListener('click', () => cy.animate({ zoom: cy.zoom() * 1.3, duration: 200 }));
   if (zoomOut) zoomOut.addEventListener('click', () => cy.animate({ zoom: cy.zoom() / 1.3, duration: 200 }));
   if (fitBtn) fitBtn.addEventListener('click', () => cy.animate({ fit: { padding: 50 }, duration: 300 }));
+
+  // ── Tools Toggle ──
+  const toolsToggle = document.getElementById('df-tools-toggle');
+  let toolsVisible = false;
+
+  if (toolsToggle) {
+    toolsToggle.addEventListener('click', () => {
+      toolsVisible = !toolsVisible;
+      toolsToggle.classList.toggle('active', toolsVisible);
+
+      const toolsBoundary = cy.nodes('[type="tools-boundary"]');
+      const toolChildNodes = cy.nodes('[type="tool-child"]');
+      const toolChildEdges = cy.edges('[edgeType="tool-child"]');
+
+      if (toolsVisible) {
+        // Show boundary
+        toolsBoundary.style('display', 'element');
+        toolsBoundary.style('opacity', 0);
+        toolsBoundary.animate({ style: { opacity: 1 } }, { duration: 400, easing: 'ease-out' });
+
+        // Show child nodes with stagger
+        toolChildNodes.style('display', 'element');
+        toolChildNodes.forEach((node, i) => {
+          node.style('opacity', 0);
+          const origY = node.position('y');
+          node.position('y', origY + 30);
+          setTimeout(() => {
+            node.animate(
+              { position: { y: origY }, style: { opacity: 1 } },
+              { duration: 400, easing: 'ease-out' }
+            );
+          }, 100 + i * 100);
+        });
+
+        // Show edges after nodes
+        setTimeout(() => {
+          toolChildEdges.style('display', 'element');
+          toolChildEdges.style('opacity', 0);
+          toolChildEdges.animate({ style: { opacity: 1 } }, { duration: 400, easing: 'ease-out' });
+        }, 100 + toolChildNodes.length * 100 + 100);
+
+        // Create HTML labels for tool-child nodes
+        setTimeout(() => {
+          toolChildNodes.forEach(node => {
+            const existing = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+            if (existing) existing.remove();
+          });
+          applyToolChildLabels(cy);
+        }, 100);
+
+        // Fit to show all
+        setTimeout(() => {
+          cy.animate({ fit: { padding: 50 }, duration: 400 });
+        }, 100 + toolChildNodes.length * 100 + 300);
+      } else {
+        // Hide with animation
+        toolChildEdges.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          toolChildEdges.style('display', 'none');
+        }});
+        toolChildNodes.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          toolChildNodes.style('display', 'none');
+        }});
+        toolsBoundary.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          toolsBoundary.style('display', 'none');
+        }});
+
+        // Remove HTML labels for tool-child nodes
+        toolChildNodes.forEach(node => {
+          const label = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+          if (label) label.remove();
+        });
+
+        // Fit back
+        setTimeout(() => {
+          cy.animate({ fit: { padding: 50 }, duration: 400 });
+        }, 400);
+      }
+    });
+  }
+
+  // Create HTML labels specifically for tool-child nodes
+  function applyToolChildLabels(cy) {
+    cy.nodes('[type="tool-child"]').forEach(node => {
+      const d = node.data();
+      const pos = node.renderedPosition();
+
+      const label = document.createElement('div');
+      label.className = 'cy-df-html-label';
+      label.dataset.nodeId = d.id;
+      label.innerHTML = `
+        <div class="cy-df-node">
+          <div class="cy-df-node-box type-tool-child">
+            <div class="cy-df-icon"><i data-lucide="${d.icon}" class="w-5 h-5"></i></div>
+            <div class="cy-df-label">${d.label}</div>
+          </div>
+        </div>
+      `;
+      label.style.cssText = `
+        position: absolute;
+        pointer-events: none;
+        z-index: 15;
+        transform: translate(-50%, -50%);
+        left: ${pos.x}px;
+        top: ${pos.y}px;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      `;
+      container.appendChild(label);
+      setTimeout(() => { label.style.opacity = '1'; }, 50);
+    });
+    if (window.lucide) lucide.createIcons();
+  }
 
   // ── Start animation when in view, stop when not ──
   const observer = new IntersectionObserver((entries) => {
