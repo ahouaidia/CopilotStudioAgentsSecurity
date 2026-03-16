@@ -2849,6 +2849,11 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(135deg, rgba(123, 94, 167, 0.12) 0%, rgba(123, 94, 167, 0.03) 100%);
 }
 
+.cy-df-node-box.type-data-child {
+  border-color: rgba(123, 94, 167, 0.35);
+  background: linear-gradient(135deg, rgba(123, 94, 167, 0.12) 0%, rgba(123, 94, 167, 0.03) 100%);
+}
+
 /* Step number badge */
 .cy-df-badge {
   position: absolute;
@@ -2940,6 +2945,8 @@ h1, h2, h3, h4, h5, h6 {
 .type-external .cy-df-label { color: var(--brand-purple); }
 .type-tool-child .cy-df-icon { color: var(--brand-purple); }
 .type-tool-child .cy-df-label { color: var(--brand-purple); }
+.type-data-child .cy-df-icon { color: var(--brand-purple); }
+.type-data-child .cy-df-label { color: var(--brand-purple); }
 
 /* Hover state — solid background + subtle bump */
 .cy-df-node-box.hovered {

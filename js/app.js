@@ -1299,10 +1299,14 @@ function initDataFlow() {
     orch:   { x: 380, y: 110 },
     tool:   { x: 760, y: 110 },
     data:   { x: 1080, y: 110 },
-    // Hidden tool sub-nodes (below tool)
+    // Hidden tool sub-nodes (above tool)
     'api-plugin':     { x: 600, y: -60 },
     'mcp-server':     { x: 760, y: -60 },
-    'agent-to-agent': { x: 920, y: -60 }
+    'agent-to-agent': { x: 920, y: -60 },
+    // Hidden data sub-nodes (above data)
+    'semantic-index':    { x: 920, y: -60 },
+    'structured-db':     { x: 1080, y: -60 },
+    'custom-semantic':   { x: 1240, y: -60 }
   };
 
   // ── Node & Edge Data Model ──
@@ -1328,7 +1332,11 @@ function initDataFlow() {
     // Tool sub-nodes (hidden initially)
     { id: 'api-plugin',     label: 'API plugin',       type: 'tool-child', icon: 'plug', parent: 'tools-boundary' },
     { id: 'mcp-server',     label: 'MCP server',       type: 'tool-child', icon: 'server', parent: 'tools-boundary' },
-    { id: 'agent-to-agent', label: 'Agent-to-agent',   type: 'tool-child', icon: 'users', parent: 'tools-boundary' }
+    { id: 'agent-to-agent', label: 'Agent-to-agent',   type: 'tool-child', icon: 'users', parent: 'tools-boundary' },
+    // Data sub-nodes (hidden initially)
+    { id: 'semantic-index',  label: 'Microsoft\nSemantic Index', type: 'data-child', icon: 'search', parent: 'data-sources-boundary' },
+    { id: 'structured-db',   label: 'Structured\nDatabase',      type: 'data-child', icon: 'table', parent: 'data-sources-boundary' },
+    { id: 'custom-semantic',  label: 'Custom\nSemantic Index',   type: 'data-child', icon: 'file-search', parent: 'data-sources-boundary' }
   ];
 
   const edges = [
@@ -1353,7 +1361,11 @@ function initDataFlow() {
     // Tool → sub-nodes (hidden initially)
     { id: 'e-tool-api',     source: 'tool', target: 'api-plugin',     label: '', edgeType: 'tool-child' },
     { id: 'e-tool-mcp',     source: 'tool', target: 'mcp-server',     label: '', edgeType: 'tool-child' },
-    { id: 'e-tool-agent',   source: 'tool', target: 'agent-to-agent', label: '', edgeType: 'tool-child' }
+    { id: 'e-tool-agent',   source: 'tool', target: 'agent-to-agent', label: '', edgeType: 'tool-child' },
+    // Data → sub-nodes (hidden initially)
+    { id: 'e-data-sem',     source: 'data', target: 'semantic-index',  label: '', edgeType: 'data-child' },
+    { id: 'e-data-db',      source: 'data', target: 'structured-db',   label: '', edgeType: 'data-child' },
+    { id: 'e-data-custom',  source: 'data', target: 'custom-semantic', label: '', edgeType: 'data-child' }
   ];
 
   // ── Build Cytoscape Elements ──
@@ -1369,6 +1381,12 @@ function initDataFlow() {
   elements.push({
     group: 'nodes',
     data: { id: 'tools-boundary', label: 'Actions and Tools', type: 'tools-boundary' }
+  });
+
+  // Compound parent for data sources boundary (hidden initially)
+  elements.push({
+    group: 'nodes',
+    data: { id: 'data-sources-boundary', label: 'Data Sources', type: 'data-sources-boundary' }
   });
 
   nodes.forEach(n => {
@@ -1392,6 +1410,10 @@ function initDataFlow() {
     // Tool-child nodes belong inside Tools boundary
     if (n.type === 'tool-child') {
       nodeData.parent = 'tools-boundary';
+    }
+    // Data-child nodes belong inside Data Sources boundary
+    if (n.type === 'data-child') {
+      nodeData.parent = 'data-sources-boundary';
     }
     elements.push({
       group: 'nodes',
@@ -1503,6 +1525,58 @@ function initDataFlow() {
     // Tool child edges (hidden initially)
     {
       selector: 'edge[edgeType="tool-child"]',
+      style: {
+        'width': 2,
+        'line-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 0.8,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [5, 4],
+        'source-endpoint': '0 -50%',
+        'target-endpoint': '0 50%',
+        'display': 'none'
+      }
+    },
+    // Data sources boundary (hidden initially)
+    {
+      selector: 'node[type="data-sources-boundary"]',
+      style: {
+        'shape': 'round-rectangle',
+        'background-color': '#0E141B',
+        'background-opacity': 0.5,
+        'border-width': 1.5,
+        'border-style': 'dashed',
+        'border-color': 'rgba(123, 94, 167, 0.3)',
+        'border-dash-pattern': [8, 6],
+        'padding': '40px',
+        'label': 'Data Sources',
+        'color': 'rgba(123, 94, 167, 0.6)',
+        'font-size': '13px',
+        'font-weight': '600',
+        'font-family': 'Montserrat, sans-serif',
+        'text-valign': 'top',
+        'text-halign': 'center',
+        'text-margin-y': -20,
+        'text-transform': 'uppercase',
+        'min-width': '100px',
+        'min-height': '100px',
+        'display': 'none'
+      }
+    },
+    // Data child nodes
+    {
+      selector: 'node[type="data-child"]',
+      style: {
+        'width': 130,
+        'height': 80,
+        'display': 'none'
+      }
+    },
+    // Data child edges (hidden initially)
+    {
+      selector: 'edge[edgeType="data-child"]',
       style: {
         'width': 2,
         'line-color': 'rgba(123, 94, 167, 0.5)',
@@ -1731,11 +1805,14 @@ function initDataFlow() {
   cy.ready(() => {
     cy.fit(40);
 
-    // Start all visible elements hidden (tool-child elements stay display:none)
+    // Start all visible elements hidden (tool/data-child elements stay display:none)
     const visibleElements = cy.elements().filter(el =>
       el.data('type') !== 'tools-boundary' &&
       el.data('type') !== 'tool-child' &&
-      el.data('edgeType') !== 'tool-child'
+      el.data('edgeType') !== 'tool-child' &&
+      el.data('type') !== 'data-sources-boundary' &&
+      el.data('type') !== 'data-child' &&
+      el.data('edgeType') !== 'data-child'
     );
     visibleElements.style('opacity', 0);
 
@@ -1762,7 +1839,7 @@ function initDataFlow() {
     // 3. Fade in edges after nodes (excluding tool-child edges)
     const edgeDelay = 200 + sortedNodes.length * 80 + 200;
     setTimeout(() => {
-      cy.edges().filter(e => e.data('edgeType') !== 'tool-child').animate({ style: { opacity: 1 } }, { duration: 600, easing: 'ease-out' });
+      cy.edges().filter(e => e.data('edgeType') !== 'tool-child' && e.data('edgeType') !== 'data-child').animate({ style: { opacity: 1 } }, { duration: 600, easing: 'ease-out' });
     }, edgeDelay);
 
     // 4. Apply HTML labels once first node starts animating
@@ -1779,7 +1856,7 @@ function initDataFlow() {
     cy.nodes().forEach(node => {
       const d = node.data();
       // Skip boundary parent nodes and tool-child nodes (handled by toggle)
-      if (d.type === 'boundary' || d.type === 'tools-boundary' || d.type === 'tool-child') return;
+      if (d.type === 'boundary' || d.type === 'tools-boundary' || d.type === 'tool-child' || d.type === 'data-sources-boundary' || d.type === 'data-child') return;
       const pos = node.renderedPosition();
       const zoom = cy.zoom();
 
@@ -2114,6 +2191,109 @@ function initDataFlow() {
           <div class="cy-df-node-box type-tool-child">
             <div class="cy-df-icon"><i data-lucide="${d.icon}" class="w-5 h-5"></i></div>
             <div class="cy-df-label">${d.label}</div>
+          </div>
+        </div>
+      `;
+      label.style.cssText = `
+        position: absolute;
+        pointer-events: none;
+        z-index: 15;
+        transform: translate(-50%, -50%);
+        left: ${pos.x}px;
+        top: ${pos.y}px;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      `;
+      container.appendChild(label);
+      setTimeout(() => { label.style.opacity = '1'; }, 50);
+    });
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // ── Data Sources Toggle ──
+  const dataToggle = document.getElementById('df-data-toggle');
+  let dataVisible = false;
+
+  if (dataToggle) {
+    dataToggle.addEventListener('click', () => {
+      dataVisible = !dataVisible;
+      dataToggle.classList.toggle('active', dataVisible);
+
+      const dataBoundary = cy.nodes('[type="data-sources-boundary"]');
+      const dataChildNodes = cy.nodes('[type="data-child"]');
+      const dataChildEdges = cy.edges('[edgeType="data-child"]');
+
+      if (dataVisible) {
+        dataBoundary.style('display', 'element');
+        dataBoundary.style('opacity', 0);
+        dataBoundary.animate({ style: { opacity: 1 } }, { duration: 400, easing: 'ease-out' });
+
+        dataChildNodes.style('display', 'element');
+        dataChildNodes.forEach((node, i) => {
+          node.style('opacity', 0);
+          const origY = node.position('y');
+          node.position('y', origY + 30);
+          setTimeout(() => {
+            node.animate(
+              { position: { y: origY }, style: { opacity: 1 } },
+              { duration: 400, easing: 'ease-out' }
+            );
+          }, 100 + i * 100);
+        });
+
+        setTimeout(() => {
+          dataChildEdges.style('display', 'element');
+          dataChildEdges.style('opacity', 0);
+          dataChildEdges.animate({ style: { opacity: 1 } }, { duration: 400, easing: 'ease-out' });
+        }, 100 + dataChildNodes.length * 100 + 100);
+
+        setTimeout(() => {
+          dataChildNodes.forEach(node => {
+            const existing = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+            if (existing) existing.remove();
+          });
+          applyDataChildLabels(cy);
+        }, 100);
+
+        setTimeout(() => {
+          cy.animate({ fit: { padding: 50 }, duration: 400 });
+        }, 100 + dataChildNodes.length * 100 + 300);
+      } else {
+        dataChildEdges.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          dataChildEdges.style('display', 'none');
+        }});
+        dataChildNodes.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          dataChildNodes.style('display', 'none');
+        }});
+        dataBoundary.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          dataBoundary.style('display', 'none');
+        }});
+
+        dataChildNodes.forEach(node => {
+          const label = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+          if (label) label.remove();
+        });
+
+        setTimeout(() => {
+          cy.animate({ fit: { padding: 50 }, duration: 400 });
+        }, 400);
+      }
+    });
+  }
+
+  function applyDataChildLabels(cy) {
+    cy.nodes('[type="data-child"]').forEach(node => {
+      const d = node.data();
+      const pos = node.renderedPosition();
+
+      const label = document.createElement('div');
+      label.className = 'cy-df-html-label';
+      label.dataset.nodeId = d.id;
+      label.innerHTML = `
+        <div class="cy-df-node">
+          <div class="cy-df-node-box type-data-child">
+            <div class="cy-df-icon"><i data-lucide="${d.icon}" class="w-5 h-5"></i></div>
+            <div class="cy-df-label">${d.label.replace(/\n/g, '<br>')}</div>
           </div>
         </div>
       `;
