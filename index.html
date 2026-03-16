@@ -1128,14 +1128,6 @@
         </p>
       </div>
 
-      <!-- Sub-heading: Agent Reference Data Flow -->
-      <div class="reveal mb-10">
-        <h3 class="font-heading text-xl font-bold text-white/90 mb-3">Agent Reference Data Flow</h3>
-        <p class="text-sm text-white/45 max-w-3xl leading-relaxed">
-          Common agent data flows start with user prompts entering the system as raw data. The orchestrator — whether a language model or logical code flow — matches prompts to appropriate response logic through iterative intent detection and response matching processes.
-        </p>
-      </div>
-
       <!-- Data Flow Diagram — Cytoscape Interactive -->
       <div class="reveal dataflow-wrapper" id="dataflow-wrapper">
         <!-- Header -->
@@ -1151,20 +1143,28 @@
           <button id="df-fit" title="Fit to View"><i data-lucide="maximize-2" class="w-4 h-4"></i></button>
           </div>
         </div>
+        <!-- Banner -->
+        <div class="dataflow-banner">
+          Common agent data flows start with user prompts entering the system as raw data. The orchestrator — whether a language model or logical code flow — matches prompts to appropriate response logic through iterative intent detection and response matching processes.
+        </div>
         <!-- Cytoscape canvas -->
         <div id="dataflow-cy"></div>
         <!-- Tooltip (populated via JS) -->
         <div id="dataflow-tooltip" class="dataflow-tooltip"></div>
       </div>
 
-      <!-- Explanatory text below diagram -->
-      <div class="reveal mt-10 space-y-4">
-        <p class="text-sm text-white/45 max-w-3xl leading-relaxed">
-          Complex agents might need multiple iterations of intent detection and response matching when initial context isn't enough for accurate responses. For example, processing <em class="text-white/60">"summarize my emails"</em> requires tool calls to retrieve grounding data that maps user identity to appropriate email accounts.
-        </p>
-        <p class="text-sm text-white/45 max-w-3xl leading-relaxed">
-          Each step in the data flow represents a <strong class="text-brand-gold/80">potential security boundary</strong> and <strong class="text-brand-gold/80">control point</strong> where you must enforce trust, traceability, and transparency requirements to maintain system integrity and user confidence.
-        </p>
+      <!-- Key insight callout -->
+      <div class="reveal mt-10">
+        <div class="rounded-xl border border-brand-gold/20 bg-brand-gold/[0.06] p-6 flex gap-4 items-start">
+          <div class="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-brand-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <p class="text-sm text-white/50 leading-relaxed">
+            Each step in the data flow represents a <strong class="text-brand-gold/80">potential security boundary</strong> and <strong class="text-brand-gold/80">control point</strong> where you must enforce trust, traceability, and transparency requirements to maintain system integrity and user confidence.
+          </p>
+        </div>
       </div>
 
     </div>
