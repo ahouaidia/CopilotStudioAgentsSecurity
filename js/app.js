@@ -1312,23 +1312,24 @@ function initDataFlow() {
   // ── Node & Edge Data Model ──
   const nodes = [
     { id: 'start',   label: 'Start',   type: 'terminal', nodeType: 'start', icon: 'play' },
-    { id: 'prompt',  label: 'Initial prompt\n/ Trigger', type: 'step', step: 1, icon: 'message-square', risk: 'medium',
-      threat: 'Prompt injection', desc: 'User prompts enter as raw, untrusted data. Malicious inputs can manipulate agent behavior.' },
+    { id: 'prompt',  label: 'Initial prompt\n/ Trigger', type: 'step', step: 1, icon: 'message-square', risk: 'critical',
+      threat: 'Prompt injection (LLM01)', desc: 'Attacker crafts input that hijacks topic routing to trigger unintended flows. User prompts enter as raw, untrusted data.' },
     { id: 'intent',  label: 'Assess\nintent', type: 'step', step: 2, icon: 'scan-search', risk: 'high',
-      threat: 'Intent manipulation', desc: 'The orchestrator classifies user intent. Adversarial prompts can trick intent detection into wrong pathways.' },
-    { id: 'match',   label: 'Match content\nto response logic', type: 'step', step: 3, icon: 'route', risk: 'high',
-      threat: 'Logic bypass', desc: 'Content is routed to the correct response handler. Misrouting can expose unauthorized capabilities.' },
+      threat: 'Unsafe orchestration (LLM06)', desc: 'Chained topic calls execute privileged actions without user confirmation. Adversarial prompts can trick intent detection into wrong pathways.' },
+    { id: 'match',   label: 'Match content\nto response logic', type: 'step', step: 3, icon: 'route', risk: 'medium',
+      threat: 'System prompt leakage (LLM07)', desc: 'Crafted prompts extract topic instructions, revealing business logic. Misrouting can expose unauthorized capabilities.' },
     { id: 'run',     label: 'Run response\nlogic', type: 'step', step: 4, icon: 'zap', risk: 'high',
-      threat: 'Unauthorized actions', desc: 'Grounding data is fetched and actions are invoked. Overprivileged connectors can leak data or trigger unintended operations.' },
-    { id: 'synth',   label: 'Synthesize\nanswer', type: 'step', step: 5, icon: 'bot', risk: 'medium',
-      threat: 'Data leakage', desc: 'The final response is assembled. Sensitive data from grounding sources can leak into conversational output.' },
+      threat: 'Privilege escalation (LLM06)', desc: 'Agent\'s service account has broader permissions than any individual user should. Overprivileged connectors can leak data or trigger unintended operations.' },
+    { id: 'synth',   label: 'Synthesize\nanswer', type: 'step', step: 5, icon: 'bot', risk: 'high',
+      threat: 'Hallucination exploitation (LLM09)', desc: 'Attacker relies on model fabricating false but convincing data to mislead users. Sensitive data from grounding sources can leak into output.' },
     { id: 'end',     label: 'End',     type: 'terminal', nodeType: 'end', icon: 'square' },
     // Orchestration layer nodes
-    { id: 'orch',    label: 'Language model or\nlogical code flow', type: 'orchestration', icon: 'brain' },
-    { id: 'tool',    label: 'Tool use', type: 'external', icon: 'wrench',
-      threat: 'Tool abuse', desc: 'External tool invocations cross trust boundaries. Unvalidated tool calls can execute with excessive permissions.' },
-    { id: 'data',    label: 'Data',    type: 'external', icon: 'database',
-      threat: 'Data exfiltration', desc: 'External data sources contain sensitive information. Insufficient access controls can expose data beyond the user\'s authorization scope.' },
+    { id: 'orch',    label: 'Language model or\nlogical code flow', type: 'orchestration', icon: 'brain', risk: 'medium',
+      threat: 'Jailbreak & guardrail bypass (LLM01)', desc: 'Adversarial prompts may trick the model into ignoring safety instructions. Microsoft-managed guardrails and content filters significantly reduce this risk.' },
+    { id: 'tool',    label: 'Tool use', type: 'external', icon: 'wrench', risk: 'high',
+      threat: 'Privilege escalation & Data exfiltration (LLM06/LLM02)', desc: 'Manipulated agent calls a connector to send sensitive data to an external endpoint. Unmanaged custom connectors bypass DLP policies.' },
+    { id: 'data',    label: 'Data',    type: 'external', icon: 'database', risk: 'critical',
+      threat: 'Sensitive info exposure & Indirect prompt injection (LLM02/LLM01)', desc: 'Agent retrieves confidential data because permissions are overly broad. Malicious instructions hidden in indexed documents get executed by the agent.' },
     // Tool sub-nodes (hidden initially)
     { id: 'api-plugin',     label: 'API plugin',       type: 'tool-child', icon: 'plug', parent: 'tools-boundary' },
     { id: 'mcp-server',     label: 'MCP server',       type: 'tool-child', icon: 'server', parent: 'tools-boundary' },
@@ -1865,7 +1866,8 @@ function initDataFlow() {
                         d.type === 'orchestration' ? 'type-orch' :
                         d.type === 'external' ? 'type-external' : '';
 
-      const riskClass = d.risk === 'high' ? 'risk-high' :
+      const riskClass = d.risk === 'critical' ? 'risk-critical' :
+                        d.risk === 'high' ? 'risk-high' :
                         d.risk === 'medium' ? 'risk-medium' : '';
 
       const isTerminal = d.nodeType === 'start' || d.nodeType === 'end';
@@ -2006,7 +2008,7 @@ function initDataFlow() {
   function showTooltip(nodeData, event) {
     if (!tooltip || !nodeData.threat) return;
 
-    const riskColor = nodeData.risk === 'high' ? '#EF4444' : nodeData.risk === 'medium' ? '#F59E0B' : '#22C55E';
+    const riskColor = nodeData.risk === 'critical' ? '#FF3333' : nodeData.risk === 'high' ? '#EF4444' : nodeData.risk === 'medium' ? '#F59E0B' : '#22C55E';
     const riskLabel = (nodeData.risk || 'low').charAt(0).toUpperCase() + (nodeData.risk || 'low').slice(1);
 
     tooltip.innerHTML = `

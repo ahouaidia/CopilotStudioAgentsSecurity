@@ -2891,6 +2891,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .cy-df-shield svg { stroke-width: 2.5; }
 
+.cy-df-shield.risk-critical { background: #1a1a2e; border: 1.5px solid #EF4444; }
 .cy-df-shield.risk-high { background: #EF4444; }
 .cy-df-shield.risk-medium { background: #F59E0B; }
 .cy-df-shield.risk-low { background: #22C55E; }
