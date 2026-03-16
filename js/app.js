@@ -1298,13 +1298,13 @@ function initDataFlow() {
     end:    { x: 1060, y: 430 },
     orch:   { x: 380, y: 110 },
     tool:   { x: 760, y: 110 },
-    data:   { x: 920, y: 110 }
+    data:   { x: 1080, y: 110 }
   };
 
   // ── Node & Edge Data Model ──
   const nodes = [
     { id: 'start',   label: 'Start',   type: 'terminal', nodeType: 'start', icon: 'play' },
-    { id: 'prompt',  label: 'Initial\nprompt', type: 'step', step: 1, icon: 'message-square', risk: 'medium',
+    { id: 'prompt',  label: 'Initial prompt\n/ Trigger', type: 'step', step: 1, icon: 'message-square', risk: 'medium',
       threat: 'Prompt injection', desc: 'User prompts enter as raw, untrusted data. Malicious inputs can manipulate agent behavior.' },
     { id: 'intent',  label: 'Assess\nintent', type: 'step', step: 2, icon: 'scan-search', risk: 'high',
       threat: 'Intent manipulation', desc: 'The orchestrator classifies user intent. Adversarial prompts can trick intent detection into wrong pathways.' },
@@ -1333,6 +1333,8 @@ function initDataFlow() {
     // Orchestration ↔ steps (vertical bidirectional)
     { id: 'e-orch-prompt',   source: 'orch',   target: 'prompt', label: '', edgeType: 'orch' },
     { id: 'e-orch-intent',   source: 'orch',   target: 'intent', label: '', edgeType: 'orch' },
+    // Match → Orchestration (unidirectional)
+    { id: 'e-match-orch',    source: 'match',  target: 'orch',   label: '', edgeType: 'orch-uni' },
     // Orchestration → external services (horizontal top row)
     { id: 'e-orch-tool',     source: 'orch',   target: 'tool',   label: 'API calls', edgeType: 'toprow' },
     { id: 'e-tool-data',     source: 'tool',   target: 'data',   label: 'Query',     edgeType: 'toprow' },
@@ -1487,7 +1489,29 @@ function initDataFlow() {
         'line-dash-pattern': [5, 4],
         'label': '',
         'source-distance-from-node': 5,
-        'target-distance-from-node': 5
+        'target-distance-from-node': 5,
+        'source-endpoint': '0 50%',
+        'target-endpoint': '0 -50%'
+      }
+    },
+    // Orchestration edge — purple dashed unidirectional (match → orch)
+    {
+      selector: 'edge[edgeType="orch-uni"]',
+      style: {
+        'width': 2,
+        'line-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-color': 'rgba(123, 94, 167, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'source-arrow-shape': 'none',
+        'arrow-scale': 0.8,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [5, 4],
+        'label': '',
+        'source-distance-from-node': 5,
+        'target-distance-from-node': 5,
+        'source-endpoint': '0 -50%',
+        'target-endpoint': '0 50%'
       }
     },
     // Top-row horizontal edges (orch→tool, tool→data)
