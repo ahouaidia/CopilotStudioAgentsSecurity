@@ -1129,30 +1129,55 @@
       </div>
 
       <!-- Data Flow Diagram — Cytoscape Interactive -->
-      <div class="reveal dataflow-wrapper" id="dataflow-wrapper">
-        <!-- Header -->
-        <div class="dataflow-header">
-          <div class="dataflow-header-left">
-            <i data-lucide="shield" class="w-5 h-5"></i>
-            <span>Agent Reference Data Flow</span>
+      <div class="reveal dataflow-flip-container" id="dataflow-flip-container">
+        <div class="dataflow-flip-inner" id="dataflow-flip-inner">
+          <!-- FRONT: Diagram -->
+          <div class="dataflow-flip-front">
+            <div class="dataflow-wrapper" id="dataflow-wrapper">
+              <!-- Header -->
+              <div class="dataflow-header">
+                <div class="dataflow-header-left">
+                  <i data-lucide="shield" class="w-5 h-5"></i>
+                  <span>Agent Reference Data Flow</span>
+                </div>
+                <!-- Controls -->
+                <div class="dataflow-controls">
+                <button id="df-threat-model-toggle" class="df-tools-btn df-tm-btn" title="Threat Modeling"><i data-lucide="scan-eye" class="w-3.5 h-3.5"></i><span>Threat Modeling</span></button>
+                <button id="df-tools-toggle" class="df-tools-btn" title="Show Tools"><i data-lucide="wrench" class="w-3.5 h-3.5"></i><span>Tools</span></button>
+                <button id="df-data-toggle" class="df-tools-btn" title="Show Data Sources"><i data-lucide="database" class="w-3.5 h-3.5"></i><span>Data</span></button>
+                <button id="df-zoom-in" title="Zoom In"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                <button id="df-zoom-out" title="Zoom Out"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                <button id="df-fit" title="Fit to View"><i data-lucide="maximize-2" class="w-4 h-4"></i></button>
+                </div>
+              </div>
+              <!-- Banner -->
+              <div class="dataflow-banner">
+                Common agent data flows start with user prompts entering the system as raw data. The orchestrator — whether a language model or logical code flow — matches prompts to appropriate response logic through iterative intent detection and response matching processes.
+              </div>
+              <!-- Cytoscape canvas -->
+              <div id="dataflow-cy"></div>
+              <!-- Tooltip (populated via JS) -->
+              <div id="dataflow-tooltip" class="dataflow-tooltip"></div>
+            </div>
           </div>
-          <!-- Zoom controls -->
-          <div class="dataflow-controls">
-          <button id="df-tools-toggle" class="df-tools-btn" title="Show Tools"><i data-lucide="wrench" class="w-3.5 h-3.5"></i><span>Tools</span></button>
-          <button id="df-data-toggle" class="df-tools-btn" title="Show Data Sources"><i data-lucide="database" class="w-3.5 h-3.5"></i><span>Data</span></button>
-          <button id="df-zoom-in" title="Zoom In"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
-          <button id="df-zoom-out" title="Zoom Out"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
-          <button id="df-fit" title="Fit to View"><i data-lucide="maximize-2" class="w-4 h-4"></i></button>
+          <!-- BACK: Threat Modeling Overview -->
+          <div class="dataflow-flip-back">
+            <div class="dataflow-wrapper">
+              <div class="dataflow-header">
+                <div class="dataflow-header-left">
+                  <i data-lucide="scan-eye" class="w-5 h-5" style="color: var(--brand-purple)"></i>
+                  <span style="color: var(--brand-purple)">Threat Modeling Approach</span>
+                </div>
+                <div class="dataflow-controls">
+                  <button id="df-threat-model-back" class="df-tools-btn df-tm-btn active" title="Back to Data Flow"><i data-lucide="arrow-left" class="w-3.5 h-3.5"></i><span>Data Flow</span></button>
+                </div>
+              </div>
+              <div class="dataflow-flip-back-content">
+                <img src="assets/ThreatModelingOverview.png" alt="Threat Modeling Overview" />
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Banner -->
-        <div class="dataflow-banner">
-          Common agent data flows start with user prompts entering the system as raw data. The orchestrator — whether a language model or logical code flow — matches prompts to appropriate response logic through iterative intent detection and response matching processes.
-        </div>
-        <!-- Cytoscape canvas -->
-        <div id="dataflow-cy"></div>
-        <!-- Tooltip (populated via JS) -->
-        <div id="dataflow-tooltip" class="dataflow-tooltip"></div>
       </div>
 
       <!-- Key insight callout -->
@@ -1167,12 +1192,6 @@
             Each step in the data flow represents a <strong class="text-brand-gold/80">potential security boundary</strong> and <strong class="text-brand-gold/80">control point</strong> where you must enforce trust, traceability, and transparency requirements to maintain system integrity and user confidence.
           </p>
         </div>
-      </div>
-
-      <!-- Threat Modeling Overview Image -->
-      <div class="reveal mt-10">
-        <img src="assets/ThreatModelingOverview.png" alt="Threat Modeling Overview" class="w-full rounded-xl" />
-        <p class="mt-4 text-center text-sm text-brand-gold font-heading font-semibold tracking-wide">Threat Modeling Approach</p>
       </div>
 
     </div>

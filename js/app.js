@@ -2100,6 +2100,25 @@ function initDataFlow() {
   if (zoomOut) zoomOut.addEventListener('click', () => cy.animate({ zoom: cy.zoom() / 1.3, duration: 200 }));
   if (fitBtn) fitBtn.addEventListener('click', () => cy.animate({ fit: { padding: 50 }, duration: 300 }));
 
+  // ── Threat Modeling Flip Toggle ──
+  const flipInner = document.getElementById('dataflow-flip-inner');
+  const tmToggle = document.getElementById('df-threat-model-toggle');
+  const tmBack = document.getElementById('df-threat-model-back');
+
+  function flipToThreatModel() {
+    if (flipInner) flipInner.classList.add('flipped');
+    if (tmToggle) tmToggle.classList.add('active');
+  }
+  function flipToDataFlow() {
+    if (flipInner) flipInner.classList.remove('flipped');
+    if (tmToggle) tmToggle.classList.remove('active');
+  }
+
+  if (tmToggle) tmToggle.addEventListener('click', () => {
+    flipInner.classList.contains('flipped') ? flipToDataFlow() : flipToThreatModel();
+  });
+  if (tmBack) tmBack.addEventListener('click', flipToDataFlow);
+
   // ── Tools Toggle ──
   const toolsToggle = document.getElementById('df-tools-toggle');
   let toolsVisible = false;
