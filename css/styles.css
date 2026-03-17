@@ -3059,6 +3059,164 @@ h1, h2, h3, h4, h5, h6 {
 .type-identity-child .cy-df-icon { color: var(--brand-blue); }
 .type-identity-child .cy-df-label { color: var(--brand-blue); }
 
+/* ── Paper-style Notes Container ── */
+.notes-paper {
+  background: #FAFAF8;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.notes-paper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 52px;
+  bottom: 0;
+  width: 1px;
+  background: rgba(220, 80, 80, 0.18);
+  z-index: 1;
+}
+
+.notes-paper-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #F5F5F0 0%, #EFEFE8 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.notes-paper-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2D2D34;
+  letter-spacing: -0.01em;
+}
+
+.notes-paper-title i {
+  color: #7B5EA7;
+}
+
+.notes-paper-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7B5EA7;
+  background: rgba(123, 94, 167, 0.1);
+  border: 1px solid rgba(123, 94, 167, 0.15);
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+
+.notes-paper-body {
+  padding: 28px 24px 28px 24px;
+  min-height: 260px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-paper-line {
+  height: 36px;
+  border-bottom: 1px solid rgba(22, 171, 224, 0.08);
+  flex-shrink: 0;
+  padding: 6px 8px 6px 60px;
+  font-family: 'Caveat', cursive;
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 24px;
+  color: #2D2D34;
+  outline: none;
+  cursor: text;
+  transition: background 0.2s ease;
+}
+
+.notes-paper-line:hover {
+  background: rgba(22, 171, 224, 0.03);
+}
+
+.notes-paper-line:focus {
+  background: rgba(22, 171, 224, 0.05);
+  border-bottom-color: rgba(22, 171, 224, 0.18);
+}
+
+.notes-paper-line:empty::before {
+  content: attr(data-placeholder);
+  color: #C8C8D0;
+  pointer-events: none;
+}
+
+.notes-paper-footer {
+  padding: 10px 24px 10px 60px;
+  background: #F5F5F0;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notes-paper-footer span {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  color: #B0B0B8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notes-paper-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.notes-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notes-btn-save {
+  background: #7B5EA7;
+  color: #fff;
+  border-color: #7B5EA7;
+}
+
+.notes-btn-save:hover {
+  background: #6A4F94;
+}
+
+.notes-btn-clear {
+  background: transparent;
+  color: #9A9AA4;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.notes-btn-clear:hover {
+  background: rgba(220, 80, 80, 0.06);
+  color: #D93D7A;
+  border-color: rgba(220, 80, 80, 0.2);
+}
+
 /* Hover state — solid background + subtle bump */
 .cy-df-node-box.hovered {
   background: rgba(157, 131, 62, 0.3);

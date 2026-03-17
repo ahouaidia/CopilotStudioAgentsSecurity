@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPlaybook();
   initDataFlow();
   initTMParticles();
+  initNotes();
 });
 
 /* -------------------------------------------------------
@@ -1494,6 +1495,56 @@ function initTMParticles() {
   });
 
   init();
+}
+
+/* -------------------------------------------------------
+   NOTES — Save / Load / Clear via localStorage
+------------------------------------------------------- */
+function initNotes() {
+  const STORAGE_KEY = 'copilot-security-workshop-notes';
+  const lines = document.querySelectorAll('.notes-paper-line');
+  const saveBtn = document.getElementById('notes-save');
+  const clearBtn = document.getElementById('notes-clear');
+  if (!lines.length) return;
+
+  // Load saved notes
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (Array.isArray(saved)) {
+      lines.forEach((line, i) => {
+        if (saved[i]) line.textContent = saved[i];
+      });
+    }
+  } catch (e) { /* ignore */ }
+
+  function saveNotes() {
+    const data = Array.from(lines).map(l => l.textContent || '');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      saveNotes();
+      const origHTML = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i><span>Saved!</span>';
+      saveBtn.style.background = '#00B0A3';
+      saveBtn.style.borderColor = '#00B0A3';
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        saveBtn.innerHTML = origHTML;
+        saveBtn.style.background = '';
+        saveBtn.style.borderColor = '';
+        if (window.lucide) lucide.createIcons();
+      }, 1500);
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      lines.forEach(l => { l.textContent = ''; });
+      localStorage.removeItem(STORAGE_KEY);
+    });
+  }
 }
 
 function initDataFlow() {

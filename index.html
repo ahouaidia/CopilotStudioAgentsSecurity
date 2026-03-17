@@ -8,7 +8,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -1200,6 +1200,36 @@
           <p class="text-sm text-white/50 leading-relaxed">
             Each step in the data flow represents a <strong class="text-brand-gold/80">potential security boundary</strong> and <strong class="text-brand-gold/80">control point</strong> where you must enforce trust, traceability, and transparency requirements to maintain system integrity and user confidence.
           </p>
+        </div>
+      </div>
+
+      <!-- Design Decisions & Notes -->
+      <div class="reveal mt-10">
+        <div class="notes-paper">
+          <div class="notes-paper-header">
+            <div class="notes-paper-title">
+              <i data-lucide="pen-line" class="w-5 h-5"></i>
+              <span>Design Decisions &amp; Notes</span>
+            </div>
+            <span class="notes-paper-badge">Workshop</span>
+          </div>
+          <div class="notes-paper-body">
+            <div class="notes-paper-line" contenteditable="true" data-placeholder="Decision or note..."></div>
+            <div class="notes-paper-line" contenteditable="true" data-placeholder=""></div>
+            <div class="notes-paper-line" contenteditable="true" data-placeholder=""></div>
+            <div class="notes-paper-line" contenteditable="true" data-placeholder=""></div>
+            <div class="notes-paper-line" contenteditable="true" data-placeholder=""></div>
+            <div class="notes-paper-line" contenteditable="true" data-placeholder=""></div>
+            <div class="notes-paper-line" contenteditable="true" data-placeholder=""></div>
+            <div class="notes-paper-line" contenteditable="true" data-placeholder=""></div>
+          </div>
+          <div class="notes-paper-footer">
+            <span><i data-lucide="info" class="w-3.5 h-3.5"></i> Notes are saved in your browser</span>
+            <div class="notes-paper-actions">
+              <button id="notes-clear" class="notes-btn notes-btn-clear" title="Clear all notes"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Clear</span></button>
+              <button id="notes-save" class="notes-btn notes-btn-save" title="Save notes"><i data-lucide="save" class="w-3.5 h-3.5"></i><span>Save</span></button>
+            </div>
+          </div>
         </div>
       </div>
 
