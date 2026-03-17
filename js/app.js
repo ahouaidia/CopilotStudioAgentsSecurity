@@ -1538,7 +1538,14 @@ function initDataFlow() {
     // Hidden data sub-nodes (above data)
     'semantic-index':    { x: 1080, y: -60 },
     'structured-db':     { x: 1240, y: -60 },
-    'custom-semantic':   { x: 1400, y: -60 }
+    'custom-semantic':   { x: 1400, y: -60 },
+    // Identity node (below boundary)
+    'identity':          { x: 380, y: 530 },
+    // Hidden identity sub-nodes (below identity)
+    'agent-identity':    { x: 400, y: 680 },
+    'agent-owner':       { x: 580, y: 680 },
+    'agent-sponsor':     { x: 760, y: 680 },
+    'agent-user':        { x: 940, y: 680 }
   };
 
   // ── Node & Edge Data Model ──
@@ -1569,7 +1576,15 @@ function initDataFlow() {
     // Data sub-nodes (hidden initially)
     { id: 'semantic-index',  label: 'Microsoft\nSemantic Index', type: 'data-child', icon: 'search', parent: 'data-sources-boundary' },
     { id: 'structured-db',   label: 'Structured\nDatabase',      type: 'data-child', icon: 'table', parent: 'data-sources-boundary' },
-    { id: 'custom-semantic',  label: 'Custom\nSemantic Index',   type: 'data-child', icon: 'file-search', parent: 'data-sources-boundary' }
+    { id: 'custom-semantic',  label: 'Custom\nSemantic Index',   type: 'data-child', icon: 'file-search', parent: 'data-sources-boundary' },
+    // Identity node (visible, below boundary)
+    { id: 'identity', label: 'Identity', type: 'external', icon: 'fingerprint', risk: 'high',
+      threat: 'Identity spoofing & Privilege abuse', desc: 'Misconfigured identity allows impersonation or over-privileged access. Agent identity determines runtime permissions across all connected systems.' },
+    // Identity sub-nodes (hidden initially)
+    { id: 'agent-identity', label: 'Agent\nIdentity',  type: 'identity-child', icon: 'bot', parent: 'identity-boundary' },
+    { id: 'agent-owner',    label: 'Agent\nOwner',     type: 'identity-child', icon: 'user-cog', parent: 'identity-boundary' },
+    { id: 'agent-sponsor',  label: 'Agent\nSponsor',   type: 'identity-child', icon: 'shield-check', parent: 'identity-boundary' },
+    { id: 'agent-user',     label: 'Agent\nUser',      type: 'identity-child', icon: 'user', parent: 'identity-boundary' }
   ];
 
   const edges = [
@@ -1598,7 +1613,14 @@ function initDataFlow() {
     // Data → sub-nodes (hidden initially)
     { id: 'e-data-sem',     source: 'data', target: 'semantic-index',  label: '', edgeType: 'data-child' },
     { id: 'e-data-db',      source: 'data', target: 'structured-db',   label: '', edgeType: 'data-child' },
-    { id: 'e-data-custom',  source: 'data', target: 'custom-semantic', label: '', edgeType: 'data-child' }
+    { id: 'e-data-custom',  source: 'data', target: 'custom-semantic', label: '', edgeType: 'data-child' },
+    // Identity ↔ Copilot Boundary
+    { id: 'e-identity-boundary', source: 'identity', target: 'orch', label: 'Authentication', edgeType: 'identity-link' },
+    // Identity → sub-nodes (hidden initially)
+    { id: 'e-id-agent',    source: 'identity', target: 'agent-identity', label: '', edgeType: 'identity-child' },
+    { id: 'e-id-owner',    source: 'identity', target: 'agent-owner',    label: '', edgeType: 'identity-child' },
+    { id: 'e-id-sponsor',  source: 'identity', target: 'agent-sponsor',  label: '', edgeType: 'identity-child' },
+    { id: 'e-id-user',     source: 'identity', target: 'agent-user',     label: '', edgeType: 'identity-child' }
   ];
 
   // ── Build Cytoscape Elements ──
@@ -1620,6 +1642,12 @@ function initDataFlow() {
   elements.push({
     group: 'nodes',
     data: { id: 'data-sources-boundary', label: 'Data Sources', type: 'data-sources-boundary' }
+  });
+
+  // Compound parent for identity boundary (hidden initially)
+  elements.push({
+    group: 'nodes',
+    data: { id: 'identity-boundary', label: 'Identity Actors', type: 'identity-boundary' }
   });
 
   nodes.forEach(n => {
@@ -1647,6 +1675,10 @@ function initDataFlow() {
     // Data-child nodes belong inside Data Sources boundary
     if (n.type === 'data-child') {
       nodeData.parent = 'data-sources-boundary';
+    }
+    // Identity-child nodes belong inside Identity boundary
+    if (n.type === 'identity-child') {
+      nodeData.parent = 'identity-boundary';
     }
     elements.push({
       group: 'nodes',
@@ -1822,6 +1854,81 @@ function initDataFlow() {
         'source-endpoint': '0 -50%',
         'target-endpoint': '0 50%',
         'display': 'none'
+      }
+    },
+    // Identity boundary container (hidden initially)
+    {
+      selector: 'node[type="identity-boundary"]',
+      style: {
+        'shape': 'round-rectangle',
+        'background-color': '#0E141B',
+        'background-opacity': 0.5,
+        'border-width': 1.5,
+        'border-style': 'dashed',
+        'border-color': 'rgba(22, 171, 224, 0.3)',
+        'border-dash-pattern': [8, 6],
+        'padding': '40px',
+        'label': 'Identity Actors',
+        'color': 'rgba(22, 171, 224, 0.6)',
+        'font-size': '13px',
+        'font-weight': '600',
+        'font-family': 'Montserrat, sans-serif',
+        'text-valign': 'top',
+        'text-halign': 'center',
+        'text-margin-y': -20,
+        'text-transform': 'uppercase',
+        'min-width': '100px',
+        'min-height': '100px',
+        'display': 'none'
+      }
+    },
+    // Identity child nodes
+    {
+      selector: 'node[type="identity-child"]',
+      style: {
+        'width': 130,
+        'height': 80,
+        'display': 'none'
+      }
+    },
+    // Identity child edges (hidden initially)
+    {
+      selector: 'edge[edgeType="identity-child"]',
+      style: {
+        'width': 2,
+        'line-color': 'rgba(22, 171, 224, 0.5)',
+        'target-arrow-color': 'rgba(22, 171, 224, 0.5)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 0.8,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [5, 4],
+        'source-endpoint': '0 50%',
+        'target-endpoint': '0 -50%',
+        'display': 'none'
+      }
+    },
+    // Identity → boundary link edge
+    {
+      selector: 'edge[edgeType="identity-link"]',
+      style: {
+        'width': 1.5,
+        'line-color': 'rgba(22, 171, 224, 0.45)',
+        'target-arrow-color': 'rgba(22, 171, 224, 0.45)',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 0.9,
+        'curve-style': 'bezier',
+        'line-style': 'dashed',
+        'line-dash-pattern': [6, 4],
+        'label': 'Authentication',
+        'color': 'rgba(22, 171, 224, 0.7)',
+        'font-size': '9px',
+        'font-weight': '600',
+        'font-family': 'Montserrat, sans-serif',
+        'text-background-color': 'rgba(14, 20, 27, 0.92)',
+        'text-background-opacity': 1,
+        'text-background-padding': '4px',
+        'text-rotation': 'autorotate'
       }
     },
     {
@@ -2045,7 +2152,10 @@ function initDataFlow() {
       el.data('edgeType') !== 'tool-child' &&
       el.data('type') !== 'data-sources-boundary' &&
       el.data('type') !== 'data-child' &&
-      el.data('edgeType') !== 'data-child'
+      el.data('edgeType') !== 'data-child' &&
+      el.data('type') !== 'identity-boundary' &&
+      el.data('type') !== 'identity-child' &&
+      el.data('edgeType') !== 'identity-child'
     );
     visibleElements.style('opacity', 0);
 
@@ -2072,7 +2182,7 @@ function initDataFlow() {
     // 3. Fade in edges after nodes (excluding tool-child edges)
     const edgeDelay = 200 + sortedNodes.length * 80 + 200;
     setTimeout(() => {
-      cy.edges().filter(e => e.data('edgeType') !== 'tool-child' && e.data('edgeType') !== 'data-child').animate({ style: { opacity: 1 } }, { duration: 600, easing: 'ease-out' });
+      cy.edges().filter(e => e.data('edgeType') !== 'tool-child' && e.data('edgeType') !== 'data-child' && e.data('edgeType') !== 'identity-child').animate({ style: { opacity: 1 } }, { duration: 600, easing: 'ease-out' });
     }, edgeDelay);
 
     // 4. Apply HTML labels once first node starts animating
@@ -2089,7 +2199,7 @@ function initDataFlow() {
     cy.nodes().forEach(node => {
       const d = node.data();
       // Skip boundary parent nodes and tool-child nodes (handled by toggle)
-      if (d.type === 'boundary' || d.type === 'tools-boundary' || d.type === 'tool-child' || d.type === 'data-sources-boundary' || d.type === 'data-child') return;
+      if (d.type === 'boundary' || d.type === 'tools-boundary' || d.type === 'tool-child' || d.type === 'data-sources-boundary' || d.type === 'data-child' || d.type === 'identity-boundary' || d.type === 'identity-child') return;
       const pos = node.renderedPosition();
       const zoom = cy.zoom();
 
@@ -2545,6 +2655,109 @@ function initDataFlow() {
       label.innerHTML = `
         <div class="cy-df-node">
           <div class="cy-df-node-box type-data-child">
+            <div class="cy-df-icon"><i data-lucide="${d.icon}" class="w-5 h-5"></i></div>
+            <div class="cy-df-label">${d.label.replace(/\n/g, '<br>')}</div>
+          </div>
+        </div>
+      `;
+      label.style.cssText = `
+        position: absolute;
+        pointer-events: none;
+        z-index: 15;
+        transform: translate(-50%, -50%);
+        left: ${pos.x}px;
+        top: ${pos.y}px;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      `;
+      container.appendChild(label);
+      setTimeout(() => { label.style.opacity = '1'; }, 50);
+    });
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // ── Identity Toggle ──
+  const identityToggle = document.getElementById('df-identity-toggle');
+  let identityVisible = false;
+
+  if (identityToggle) {
+    identityToggle.addEventListener('click', () => {
+      identityVisible = !identityVisible;
+      identityToggle.classList.toggle('active', identityVisible);
+
+      const identityBoundary = cy.nodes('[type="identity-boundary"]');
+      const identityChildNodes = cy.nodes('[type="identity-child"]');
+      const identityChildEdges = cy.edges('[edgeType="identity-child"]');
+
+      if (identityVisible) {
+        identityBoundary.style('display', 'element');
+        identityBoundary.style('opacity', 0);
+        identityBoundary.animate({ style: { opacity: 1 } }, { duration: 400, easing: 'ease-out' });
+
+        identityChildNodes.style('display', 'element');
+        identityChildNodes.forEach((node, i) => {
+          node.style('opacity', 0);
+          const origY = node.position('y');
+          node.position('y', origY - 30);
+          setTimeout(() => {
+            node.animate(
+              { position: { y: origY }, style: { opacity: 1 } },
+              { duration: 400, easing: 'ease-out' }
+            );
+          }, 100 + i * 100);
+        });
+
+        setTimeout(() => {
+          identityChildEdges.style('display', 'element');
+          identityChildEdges.style('opacity', 0);
+          identityChildEdges.animate({ style: { opacity: 1 } }, { duration: 400, easing: 'ease-out' });
+        }, 100 + identityChildNodes.length * 100 + 100);
+
+        setTimeout(() => {
+          identityChildNodes.forEach(node => {
+            const existing = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+            if (existing) existing.remove();
+          });
+          applyIdentityChildLabels(cy);
+        }, 100);
+
+        setTimeout(() => {
+          cy.animate({ fit: { padding: 50 }, duration: 400 });
+        }, 100 + identityChildNodes.length * 100 + 300);
+      } else {
+        identityChildEdges.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          identityChildEdges.style('display', 'none');
+        }});
+        identityChildNodes.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          identityChildNodes.style('display', 'none');
+        }});
+        identityBoundary.animate({ style: { opacity: 0 } }, { duration: 300, easing: 'ease-in', complete: () => {
+          identityBoundary.style('display', 'none');
+        }});
+
+        identityChildNodes.forEach(node => {
+          const label = container.querySelector(`.cy-df-html-label[data-node-id="${node.data('id')}"]`);
+          if (label) label.remove();
+        });
+
+        setTimeout(() => {
+          cy.animate({ fit: { padding: 50 }, duration: 400 });
+        }, 400);
+      }
+    });
+  }
+
+  function applyIdentityChildLabels(cy) {
+    cy.nodes('[type="identity-child"]').forEach(node => {
+      const d = node.data();
+      const pos = node.renderedPosition();
+
+      const label = document.createElement('div');
+      label.className = 'cy-df-html-label';
+      label.dataset.nodeId = d.id;
+      label.innerHTML = `
+        <div class="cy-df-node">
+          <div class="cy-df-node-box type-identity-child">
             <div class="cy-df-icon"><i data-lucide="${d.icon}" class="w-5 h-5"></i></div>
             <div class="cy-df-label">${d.label.replace(/\n/g, '<br>')}</div>
           </div>
