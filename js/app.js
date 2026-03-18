@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTMParticles();
   initNotes();
   initDefensesWaves();
+  initDefensesFindings();
 });
 
 /* -------------------------------------------------------
@@ -1619,6 +1620,201 @@ function initDefensesWaves() {
       recenterMouse();
     }, 200);
   });
+}
+
+/* -------------------------------------------------------
+   DEFENSES FINDINGS SLIDER — 10 numbered findings
+------------------------------------------------------- */
+function initDefensesFindings() {
+  var container = document.getElementById('defensesSlideContainer');
+  var bigNumber = document.getElementById('defensesBigNumber');
+  var progressFill = document.getElementById('defensesProgressFill');
+  var counter = document.getElementById('defensesCounter');
+  var sourceEl = document.getElementById('defensesSource');
+  var prevBtn = document.getElementById('defensesPrev');
+  var nextBtn = document.getElementById('defensesNext');
+  var postit = document.getElementById('defensesPostit');
+  if (!container) return;
+
+  var findings = [
+    {
+      id: 'G01',
+      risk: 'Critical',
+      riskColor: '#D93D7A',
+      title: 'Enforce Entra ID Authentication on All Agents',
+      insight: 'Agents published without <strong>authentication</strong> are accessible to anyone with the link. Enforce Entra ID sign-in to ensure only authorized users can interact with agent endpoints.',
+      source: 'Microsoft Entra ID',
+      image: null
+    },
+    {
+      id: 'G02',
+      risk: 'Critical',
+      riskColor: '#D93D7A',
+      title: 'Configure DLP Policies for Connector Restrictions',
+      insight: 'Without <strong>Data Loss Prevention</strong> policies, agents can exfiltrate data via unauthorized connectors. Block non-business connectors and restrict HTTP actions to approved endpoints.',
+      source: 'Power Platform DLP',
+      image: null
+    },
+    {
+      id: 'G03',
+      risk: 'High',
+      riskColor: '#9D833E',
+      title: 'Enable Content Moderation for All Topics',
+      insight: 'Unmoderated agent responses can produce <strong>harmful or off-brand content</strong>. Enable Azure AI Content Safety to filter toxic, violent, and self-harm content in real time.',
+      source: 'Azure AI Content Safety',
+      image: null
+    },
+    {
+      id: 'G04',
+      risk: 'High',
+      riskColor: '#9D833E',
+      title: 'Restrict Knowledge Sources to Approved SharePoint Sites',
+      insight: 'Agents with unrestricted SharePoint access risk <strong>oversharing sensitive data</strong>. Limit knowledge sources to curated, security-reviewed site collections only.',
+      source: 'SharePoint & Copilot Studio',
+      image: null
+    },
+    {
+      id: 'G05',
+      risk: 'High',
+      riskColor: '#9D833E',
+      title: 'Implement Conversation Logging and Audit Trail',
+      insight: 'Without logging, <strong>prompt injection attempts</strong> and data leaks go undetected. Route conversation transcripts to a Log Analytics workspace for monitoring and forensic analysis.',
+      source: 'Azure Monitor',
+      image: null
+    },
+    {
+      id: 'G06',
+      risk: 'Medium',
+      riskColor: '#16ABE0',
+      title: 'Apply Rate Limiting on Agent Endpoints',
+      insight: 'Exposed agents without rate limiting are vulnerable to <strong>denial-of-service and brute-force</strong> attacks. Configure throttling at the API Management or Direct Line layer.',
+      source: 'Azure API Management',
+      image: null
+    },
+    {
+      id: 'G07',
+      risk: 'Medium',
+      riskColor: '#16ABE0',
+      title: 'Rotate Secrets and Tokens on a 90-Day Cycle',
+      insight: 'Long-lived secrets in agent connectors increase <strong>credential compromise</strong> risk. Automate rotation for client secrets, API keys, and connection tokens every 90 days.',
+      source: 'Azure Key Vault',
+      image: null
+    },
+    {
+      id: 'G08',
+      risk: 'Medium',
+      riskColor: '#16ABE0',
+      title: 'Scope Agent Permissions with Least-Privilege RBAC',
+      insight: 'Agents running under broad service accounts can <strong>escalate privileges</strong> unintentionally. Assign minimal Entra app roles and limit Graph API scopes to required operations.',
+      source: 'Microsoft Entra RBAC',
+      image: null
+    },
+    {
+      id: 'G09',
+      risk: 'Low',
+      riskColor: '#00B0A3',
+      title: 'Enable Grounding Validation for AI-Generated Responses',
+      insight: 'Without grounding checks, agents may <strong>hallucinate references</strong> to non-existent policies or documents. Validate generated citations against the actual knowledge base before surfacing to users.',
+      source: 'Copilot Studio Generative AI',
+      image: null
+    },
+    {
+      id: 'G10',
+      risk: 'Low',
+      riskColor: '#00B0A3',
+      title: 'Publish Agents Through Managed Environments Only',
+      insight: 'Agents deployed outside <strong>managed environments</strong> bypass governance controls. Require all production agents to go through solution-aware, environment-controlled deployment pipelines.',
+      source: 'Power Platform Environments',
+      image: null
+    }
+  ];
+
+  var STORAGE_KEY = 'defenses-findings-notes';
+  var notes = [];
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (Array.isArray(saved)) notes = saved;
+  } catch (e) {}
+
+  var current = 0;
+
+  var postitTab = postit ? postit.querySelector('.postit-tab') : null;
+  var postitTextarea = postit ? postit.querySelector('.postit-textarea') : null;
+
+  if (postitTab) {
+    postitTab.addEventListener('click', function(e) {
+      e.stopPropagation();
+      postit.classList.toggle('is-open');
+      if (postit.classList.contains('is-open') && postitTextarea) postitTextarea.focus();
+    });
+  }
+  if (postitTextarea) {
+    postitTextarea.addEventListener('click', function(e) { e.stopPropagation(); });
+    postitTextarea.addEventListener('input', function() {
+      notes[current] = this.value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+      if (this.value.trim()) postit.classList.add('has-note');
+      else postit.classList.remove('has-note');
+    });
+  }
+
+  function render(index, direction) {
+    var f = findings[index];
+    var oldSlide = container.querySelector('.findings-slide.is-active');
+    if (oldSlide) {
+      oldSlide.classList.remove('is-active');
+      oldSlide.classList.add('is-exiting');
+      setTimeout(function() { oldSlide.remove(); }, 500);
+    }
+
+    var slide = document.createElement('div');
+    slide.className = 'findings-slide';
+    if (direction === 'prev') slide.style.transform = 'translateX(-40px)';
+
+    slide.innerHTML =
+      '<div class="findings-risk-pill">' +
+        '<span class="findings-risk-dot" style="background:' + f.riskColor + ';"></span>' +
+        f.risk +
+      '</div>' +
+      '<h3 class="findings-title">' + f.title + '</h3>' +
+      '<p class="findings-insight">' + f.insight + '</p>';
+
+    container.appendChild(slide);
+
+    // Update postit
+    if (postit) {
+      postit.classList.remove('is-open');
+      var noteVal = notes[index] || '';
+      if (postitTextarea) postitTextarea.value = noteVal;
+      if (noteVal.trim()) postit.classList.add('has-note');
+      else postit.classList.remove('has-note');
+    }
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        slide.classList.add('is-active');
+      });
+    });
+
+    bigNumber.textContent = f.id;
+    counter.textContent = f.id + ' / ' + String(findings.length).padStart(2, '0');
+    progressFill.style.height = ((index + 1) / findings.length * 100) + '%';
+    sourceEl.textContent = f.source;
+  }
+
+  function goNext() { current = (current + 1) % findings.length; render(current, 'next'); }
+  function goPrev() { current = (current - 1 + findings.length) % findings.length; render(current, 'prev'); }
+
+  nextBtn.addEventListener('click', goNext);
+  prevBtn.addEventListener('click', goPrev);
+
+  document.getElementById('defensesSlider').addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') goNext();
+    if (e.key === 'ArrowLeft') goPrev();
+  });
+
+  render(0, 'next');
+  if (window.lucide) lucide.createIcons();
 }
 
 /* -------------------------------------------------------
