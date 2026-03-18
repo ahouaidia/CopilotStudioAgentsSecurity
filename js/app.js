@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDataFlow();
   initTMParticles();
   initNotes();
+  initDefensesWaves();
 });
 
 /* -------------------------------------------------------
@@ -1495,6 +1496,129 @@ function initTMParticles() {
   });
 
   init();
+}
+
+/* -------------------------------------------------------
+   DEFENSES — Glowy Waves Canvas Animation
+------------------------------------------------------- */
+function initDefensesWaves() {
+  const canvas = document.getElementById('defenses-waves');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let animId = null;
+  let time = 0;
+
+  // Mouse tracking with smoothing
+  const mouse = { x: 0, y: 0 };
+  const targetMouse = { x: 0, y: 0 };
+  const smoothing = 0.1;
+  const mouseInfluence = 70;
+  const influenceRadius = 320;
+
+  // Brand-colored wave palette
+  const wavePalette = [
+    { offset: 0,              amplitude: 70, frequency: 0.003,  color: 'rgba(22, 171, 224, 0.8)',  opacity: 0.45 },  // blue
+    { offset: Math.PI / 2,    amplitude: 90, frequency: 0.0026, color: 'rgba(123, 94, 167, 0.7)',  opacity: 0.35 },  // purple
+    { offset: Math.PI,        amplitude: 60, frequency: 0.0034, color: 'rgba(0, 176, 163, 0.65)',  opacity: 0.30 },  // turquoise
+    { offset: Math.PI * 1.5,  amplitude: 80, frequency: 0.0022, color: 'rgba(157, 131, 62, 0.25)', opacity: 0.25 },  // gold
+    { offset: Math.PI * 2,    amplitude: 55, frequency: 0.004,  color: 'rgba(217, 61, 122, 0.2)',  opacity: 0.20 },  // pink
+  ];
+
+  function resizeCanvas() {
+    canvas.width = canvas.parentElement.offsetWidth;
+    canvas.height = canvas.parentElement.offsetHeight;
+  }
+
+  function recenterMouse() {
+    mouse.x = targetMouse.x = canvas.width / 2;
+    mouse.y = targetMouse.y = canvas.height / 2;
+  }
+
+  function drawWave(wave) {
+    ctx.save();
+    ctx.beginPath();
+
+    for (let x = 0; x <= canvas.width; x += 4) {
+      const dx = x - mouse.x;
+      const dy = canvas.height / 2 - mouse.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const influence = Math.max(0, 1 - distance / influenceRadius);
+      const mouseEffect = influence * mouseInfluence *
+        Math.sin(time * 0.001 + x * 0.01 + wave.offset);
+
+      const y = canvas.height / 2 +
+        Math.sin(x * wave.frequency + time * 0.002 + wave.offset) * wave.amplitude +
+        Math.sin(x * wave.frequency * 0.4 + time * 0.003) * (wave.amplitude * 0.45) +
+        mouseEffect;
+
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = wave.color;
+    ctx.globalAlpha = wave.opacity;
+    ctx.shadowBlur = 35;
+    ctx.shadowColor = wave.color;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function animate() {
+    time += 1;
+
+    mouse.x += (targetMouse.x - mouse.x) * smoothing;
+    mouse.y += (targetMouse.y - mouse.y) * smoothing;
+
+    // Dark gradient background each frame
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, 'rgba(33, 33, 41, 1)');
+    gradient.addColorStop(1, 'rgba(33, 33, 41, 0.95)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+
+    wavePalette.forEach(drawWave);
+
+    animId = requestAnimationFrame(animate);
+  }
+
+  resizeCanvas();
+  recenterMouse();
+
+  // Mouse interactivity
+  const section = canvas.parentElement;
+  section.addEventListener('mousemove', function(e) {
+    const rect = section.getBoundingClientRect();
+    targetMouse.x = e.clientX - rect.left;
+    targetMouse.y = e.clientY - rect.top;
+  });
+  section.addEventListener('mouseleave', recenterMouse);
+
+  // Only animate when visible
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        if (!animId) { resizeCanvas(); animate(); }
+      } else {
+        if (animId) { cancelAnimationFrame(animId); animId = null; }
+      }
+    });
+  }, { threshold: 0.05 });
+  observer.observe(section);
+
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      resizeCanvas();
+      recenterMouse();
+    }, 200);
+  });
 }
 
 /* -------------------------------------------------------

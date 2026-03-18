@@ -3229,6 +3229,29 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(220, 80, 80, 0.2);
 }
 
+/* ── Defenses Section — Glowy Waves & Image ── */
+.defenses-waves-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.defenses-image-container {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.defenses-image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0;
+}
+
 /* Hover state — solid background + subtle bump */
 .cy-df-node-box.hovered {
   background: rgba(157, 131, 62, 0.3);
