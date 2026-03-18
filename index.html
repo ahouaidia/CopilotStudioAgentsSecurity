@@ -1262,7 +1262,7 @@
       </div>
 
       <!-- Findings Slider -->
-      <div class="reveal mt-16">
+      <div class="reveal mt-16" style="position: relative;">
         <div class="defenses-slider" id="defensesSlider">
           <!-- Left: vertical label + progress -->
           <div class="findings-sidebar">
@@ -1295,16 +1295,16 @@
 
           <!-- Oversized number background -->
           <div class="findings-big-number" id="defensesBigNumber">01</div>
+        </div>
 
-          <!-- Post-it note -->
-          <div class="postit-note" id="defensesPostit">
-            <div class="postit-tab">
-              <i data-lucide="sticky-note" class="w-3.5 h-3.5"></i>
-              <span>Notes</span>
-            </div>
-            <div class="postit-body">
-              <textarea class="postit-textarea" placeholder="Add your notes here..."></textarea>
-            </div>
+        <!-- Post-it note (outside slider to avoid overflow:hidden clipping) -->
+        <div class="postit-note" id="defensesPostit">
+          <div class="postit-tab">
+            <i data-lucide="sticky-note" class="w-3.5 h-3.5"></i>
+            <span>Notes</span>
+          </div>
+          <div class="postit-body">
+            <textarea class="postit-textarea" placeholder="Add your notes here..."></textarea>
           </div>
         </div>
       </div>
