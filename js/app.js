@@ -1532,9 +1532,19 @@ function initDefensesWaves() {
     canvas.height = canvas.parentElement.offsetHeight;
   }
 
+  function getWaveCenterY() {
+    var img = document.querySelector('#defenses .defenses-image-container');
+    if (img) {
+      var sectionRect = canvas.parentElement.getBoundingClientRect();
+      var imgRect = img.getBoundingClientRect();
+      return (imgRect.top - sectionRect.top) + imgRect.height / 2;
+    }
+    return canvas.height / 2;
+  }
+
   function recenterMouse() {
     mouse.x = targetMouse.x = canvas.width / 2;
-    mouse.y = targetMouse.y = canvas.height / 2;
+    mouse.y = targetMouse.y = getWaveCenterY();
   }
 
   function drawWave(wave) {
@@ -1543,13 +1553,14 @@ function initDefensesWaves() {
 
     for (let x = 0; x <= canvas.width; x += 4) {
       const dx = x - mouse.x;
-      const dy = canvas.height / 2 - mouse.y;
+      var centerY = getWaveCenterY();
+      const dy = centerY - mouse.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const influence = Math.max(0, 1 - distance / influenceRadius);
       const mouseEffect = influence * mouseInfluence *
         Math.sin(time * 0.001 + x * 0.01 + wave.offset);
 
-      const y = canvas.height / 2 +
+      const y = centerY +
         Math.sin(x * wave.frequency + time * 0.002 + wave.offset) * wave.amplitude +
         Math.sin(x * wave.frequency * 0.4 + time * 0.003) * (wave.amplitude * 0.45) +
         mouseEffect;
