@@ -1700,6 +1700,22 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================================
    SPECTRUM — Agent Capabilities & Risk Level
    ============================================================ */
+/* Wrapper that slides open on Explore click */
+.spectrum-reveal-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin-top: 0;
+  transition: max-height 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.6s ease 0.1s,
+              margin-top 0.6s ease;
+}
+.spectrum-reveal-wrapper.is-revealed {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 2rem;
+}
+
 .spectrum-container {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -3227,6 +3243,563 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(220, 80, 80, 0.06);
   color: #D93D7A;
   border-color: rgba(220, 80, 80, 0.2);
+}
+
+/* ── Spectrum of Agents ── */
+/* ── Spectrum of Agents — Entropy Canvas + Cards ── */
+
+/* Full-width container for canvas + cards */
+.spectrum-canvas-container {
+  position: relative;
+  width: 100%;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* ── Segmented label line above canvas ── */
+.spectrum-segment-line {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  width: 100%;
+  height: 28px;
+  pointer-events: none;
+}
+
+.spectrum-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  transition: flex 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.spectrum-segment-platforms {
+  flex: 1;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.spectrum-segment-agents {
+  flex: 1;
+}
+
+.spectrum-segment-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.agent-network-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Pulsing code-level indicators (between segment line and cards) ── */
+.platform-code-indicators {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  height: 36px;
+  padding: 0 2.5rem;
+  pointer-events: none;
+}
+
+.platform-code-dot {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  transition: left 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.5s ease;
+}
+
+.platform-code-ping {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  position: relative;
+}
+
+.platform-code-ping::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: codePing 2s ease-out infinite;
+}
+
+.platform-code-ring {
+  display: none;
+}
+
+.platform-code-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+@keyframes codePing {
+  0% { transform: scale(1); opacity: 0.6; }
+  70% { transform: scale(2.5); opacity: 0; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.agents-spectrum {
+  position: relative;
+  padding: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* ── Stacked card grid — sits inside the canvas container ── */
+.platform-stack {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 2.5rem;
+  perspective: 1200px;
+  gap: 0;
+}
+
+/* ── Base card — FreelancerProfileCard style ── */
+.platform-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 18rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #1a1a24;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: default;
+  overflow: hidden;
+  opacity: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transform-style: preserve-3d;
+  flex-shrink: 0;
+}
+
+.agents-spectrum.is-revealed .platform-card {
+  opacity: 1;
+}
+
+/* ── Banner at top ── */
+.platform-card-banner {
+  position: relative;
+  width: 100%;
+  height: 8.5rem;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dark overlay on banner — subtle darkening when not hovered */
+.platform-card-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  transition: opacity 0.5s ease;
+  z-index: 1;
+}
+
+.platform-card:hover .platform-card-banner::after {
+  opacity: 0;
+}
+
+/* Banner title text */
+.platform-card-banner-title {
+  position: relative;
+  z-index: 2;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Yellow star badge — workshop focus indicator */
+.platform-card-focus-star {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 3;
+  color: #FFD700;
+  fill: #FFD700;
+  filter: drop-shadow(0 2px 6px rgba(255, 215, 0, 0.7));
+  animation: starPulse 2s ease-in-out infinite;
+}
+
+.platform-card-focus-star svg {
+  fill: #FFD700;
+  stroke: #FFD700;
+}
+
+@keyframes starPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+
+.platform-card-banner-orange {
+  background: linear-gradient(135deg, #f7a837 0%, #f06292 40%, #9c27b0 100%);
+}
+
+.platform-card-banner-teal {
+  background: linear-gradient(135deg, #4de8c2 0%, #17c5c5 40%, #1976d2 100%);
+}
+
+.platform-card-banner-bluepurple {
+  background: linear-gradient(135deg, #4fc3f7 0%, #5c6bc0 50%, #9c27b0 100%);
+}
+
+/* ── Circle avatar overlapping banner ── */
+.platform-card-avatar {
+  position: absolute;
+  left: 50%;
+  top: 8.5rem;
+  transform: translateX(-50%) translateY(-50%);
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  border: 4px solid #1a1a24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.platform-card-avatar-turquoise {
+  background: linear-gradient(135deg, #00B0A3 0%, #008f84 100%);
+}
+
+.platform-card-avatar-blue {
+  background: linear-gradient(135deg, #16ABE0 0%, #0d8bbf 100%);
+}
+
+.platform-card-avatar-pink {
+  background: linear-gradient(135deg, #D93D7A 0%, #b02e62 100%);
+}
+
+.platform-card-avatar-img {
+  width: 2.2rem;
+  height: 2.2rem;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* ── Grayscale overlay for inactive cards ── */
+.platform-card-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  background: rgba(26, 26, 36, 0.55);
+  z-index: 6;
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
+
+.platform-card:hover .platform-card-overlay {
+  opacity: 0;
+}
+
+/* ── Card content (below avatar) ── */
+.platform-card-content {
+  position: relative;
+  z-index: 1;
+  padding: 2.8rem 1.5rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.platform-card-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.platform-card-label-turquoise { color: var(--brand-turquoise); }
+.platform-card-label-blue { color: var(--brand-blue); }
+.platform-card-label-pink { color: var(--brand-pink); }
+
+.platform-card-desc {
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  max-width: 18rem;
+}
+
+/* Feature list */
+.platform-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.platform-card-features li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.platform-card-features li i {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.platform-card[data-platform="agent-builder"] .platform-card-features li i {
+  color: var(--brand-turquoise);
+}
+
+.platform-card[data-platform="copilot-studio"] .platform-card-features li i {
+  color: var(--brand-blue);
+}
+
+.platform-card[data-platform="azure-foundry"] .platform-card-features li i {
+  color: var(--brand-pink);
+}
+
+.platform-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.25);
+  margin: 0;
+}
+
+.platform-card-meta-gold { color: var(--brand-gold); }
+.platform-card-meta-pink { color: var(--brand-pink); }
+
+/* ── Positioning: 3D perspective fan layout ── */
+.platform-card-back {
+  transform: rotateY(25deg) translateX(30px);
+  z-index: 1;
+}
+
+.platform-card-back:hover {
+  transform: rotateY(25deg) translateX(30px) translateY(-12px);
+  border-color: rgba(0, 176, 163, 0.25);
+}
+
+.platform-card-mid {
+  transform: rotateY(0deg) translateZ(20px);
+  z-index: 3;
+  margin: 0 -1.5rem;
+}
+
+.platform-card-mid:hover {
+  transform: rotateY(0deg) translateZ(20px) translateY(-12px);
+  border-color: rgba(22, 171, 224, 0.25);
+}
+
+.platform-card-front {
+  transform: rotateY(-25deg) translateX(-30px);
+  z-index: 1;
+}
+
+.platform-card-front:hover {
+  transform: rotateY(-25deg) translateX(-30px) translateY(-12px);
+  border-color: rgba(217, 61, 122, 0.25);
+}
+
+/* No overlay on any card by default — all show full color */
+.platform-card-front .platform-card-overlay,
+.platform-card-back .platform-card-overlay,
+.platform-card-mid .platform-card-overlay {
+  display: none;
+}
+
+/* Hover glow */
+.platform-card:hover {
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Expanded state — all flatten & stack behind Copilot Studio ── */
+.platform-stack.is-expanded {
+  perspective: none;
+}
+
+.platform-stack.is-expanded .platform-card-back {
+  transform: rotateY(0deg) translateX(0px) scale(0.92);
+  position: absolute;
+  filter: grayscale(70%);
+  z-index: 1;
+  opacity: 0.5;
+}
+
+.platform-stack.is-expanded .platform-card-back:hover {
+  transform: rotateY(0deg) translateX(0px) scale(0.92);
+  filter: grayscale(40%);
+  opacity: 0.7;
+}
+
+.platform-stack.is-expanded .platform-card-front {
+  transform: rotateY(0deg) translateX(0px) scale(0.96);
+  position: absolute;
+  filter: grayscale(50%);
+  z-index: 2;
+  opacity: 0.6;
+}
+
+.platform-stack.is-expanded .platform-card-front:hover {
+  transform: rotateY(0deg) translateX(0px) scale(0.96);
+  filter: grayscale(20%);
+  opacity: 0.8;
+}
+
+/* Copilot Studio: flat, centered, on top */
+.platform-stack.is-expanded .platform-card-mid {
+  transform: rotateY(0deg) translateZ(0px);
+  filter: grayscale(0%);
+  border-color: rgba(22, 171, 224, 0.35);
+  box-shadow: 0 0 40px rgba(22, 171, 224, 0.12), inset 0 0 20px rgba(22, 171, 224, 0.04);
+  z-index: 10;
+  margin: 0;
+}
+
+.platform-stack.is-expanded .platform-card-mid .platform-card-overlay {
+  opacity: 0;
+}
+
+/* ── Explore button (inside card) ── */
+.platform-explore-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 9px 16px;
+  border: 1px solid rgba(22, 171, 224, 0.25);
+  border-radius: 10px;
+  background: rgba(22, 171, 224, 0.06);
+  color: var(--brand-blue);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 4;
+}
+
+.platform-explore-btn:hover {
+  background: rgba(22, 171, 224, 0.12);
+  border-color: rgba(22, 171, 224, 0.4);
+  box-shadow: 0 0 20px rgba(22, 171, 224, 0.15);
+}
+
+.platform-explore-btn-turquoise {
+  border-color: rgba(0, 176, 163, 0.25);
+  background: rgba(0, 176, 163, 0.06);
+  color: var(--brand-turquoise);
+}
+.platform-explore-btn-turquoise:hover {
+  background: rgba(0, 176, 163, 0.12);
+  border-color: rgba(0, 176, 163, 0.4);
+  box-shadow: 0 0 20px rgba(0, 176, 163, 0.15);
+}
+
+.platform-explore-btn-pink {
+  border-color: rgba(217, 61, 122, 0.25);
+  background: rgba(217, 61, 122, 0.06);
+  color: var(--brand-pink);
+}
+.platform-explore-btn-pink:hover {
+  background: rgba(217, 61, 122, 0.12);
+  border-color: rgba(217, 61, 122, 0.4);
+  box-shadow: 0 0 20px rgba(217, 61, 122, 0.15);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .platform-stack {
+    perspective: 800px;
+  }
+  .platform-card {
+    width: 13rem;
+  }
+  .platform-card-banner {
+    height: 6rem;
+  }
+  .platform-card-avatar {
+    top: 6rem;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  .platform-card-avatar-img {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+  .platform-card-content {
+    padding: 2rem 1rem 1rem;
+  }
+  .platform-card-back {
+    transform: rotateY(20deg) translateX(15px);
+  }
+  .platform-card-mid {
+    transform: rotateY(0deg) translateZ(10px);
+    margin: 0 -1rem;
+  }
+  .platform-card-front {
+    transform: rotateY(-20deg) translateX(-15px);
+  }
+  .platform-stack.is-expanded .platform-card-back {
+    transform: rotateY(0deg) translateX(0px) scale(0.9);
+  }
+  .platform-stack.is-expanded .platform-card-front {
+    transform: rotateY(0deg) translateX(0px) scale(0.95);
+  }
+  .platform-stack.is-expanded .platform-card-mid {
+    transform: rotateY(0deg) translateZ(0px);
+    margin: 0;
+  }
 }
 
 /* ── Defenses Section — Glowy Waves & Image ── */

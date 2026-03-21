@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNotes();
   initDefensesWaves();
   initDefensesFindings();
+  initSpectrumOfAgents();
 });
 
 /* -------------------------------------------------------
@@ -1631,6 +1632,417 @@ function initDefensesWaves() {
       recenterMouse();
     }, 200);
   });
+}
+
+/* -------------------------------------------------------
+   SPECTRUM OF AGENTS — Scroll-triggered reveal
+------------------------------------------------------- */
+function initSpectrumOfAgents() {
+  var container = document.querySelector('.agents-spectrum');
+  if (!container) return;
+
+  // Scroll-reveal
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        container.classList.add('is-revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  observer.observe(container);
+
+  // -- Entropy Canvas (order ↔ chaos particle network) --
+  // Optimized: fewer particles, batched draw calls, squared-distance checks,
+  // globalAlpha instead of hex-string concat, visibility pause via IntersectionObserver
+  var canvas = document.getElementById('agentNetworkCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var canvasContainer = canvas.closest('.spectrum-canvas-container');
+  var particles = [];
+  var entropyFrame;
+  var entropyTime = 0;
+  var dpr = window.devicePixelRatio || 1;
+  var isVisible = true; // pause when off-screen
+
+  // Cached logical dimensions (updated on resize)
+  var cachedW = 0;
+  var cachedH = 0;
+
+  // Dynamic order/chaos boundary ratio (0-1, fraction of canvas width)
+  var orderRatio = 0.5;
+  var orderRatioTarget = 0.5;
+
+  // Segmented line elements
+  var segPlatforms = document.getElementById('segmentPlatforms');
+  var segAgents = document.getElementById('segmentAgents');
+
+  // Code-level indicator dots
+  var codeDots = document.querySelectorAll('.platform-code-dot');
+
+  // Connection distance thresholds (squared to avoid sqrt)
+  var LINK_DIST = 120;
+  var LINK_DIST_SQ = LINK_DIST * LINK_DIST;
+  var INFLUENCE_DIST = 100;
+  var INFLUENCE_DIST_SQ = INFLUENCE_DIST * INFLUENCE_DIST;
+
+  // Visibility observer — pause animation when section is off-screen
+  var visObs = new IntersectionObserver(function(entries) {
+    isVisible = entries[0].isIntersecting;
+    if (isVisible && !entropyFrame) {
+      entropyFrame = requestAnimationFrame(drawEntropy);
+    }
+  }, { threshold: 0.05 });
+  visObs.observe(canvasContainer);
+
+  function computeOrderRatio() {
+    var containerRect = canvasContainer.getBoundingClientRect();
+    var stackCards = canvasContainer.querySelectorAll('.platform-card');
+    if (!stackCards.length || containerRect.width === 0) return 0.5;
+    var maxRight = 0;
+    for (var i = 0; i < stackCards.length; i++) {
+      var right = stackCards[i].getBoundingClientRect().right - containerRect.left;
+      if (right > maxRight) maxRight = right;
+    }
+    var ratio = (maxRight + 20) / containerRect.width;
+    ratio = Math.max(0.15, Math.min(ratio, 0.85));
+    updateSegmentWidths(ratio);
+    return ratio;
+  }
+
+  function updateSegmentWidths(ratio) {
+    if (!segPlatforms || !segAgents) return;
+    var pct = Math.round(ratio * 100);
+    segPlatforms.style.flex = '0 0 ' + pct + '%';
+    segAgents.style.flex = '0 0 ' + (100 - pct) + '%';
+  }
+
+  function positionCodeDots() {
+    if (!codeDots.length) return;
+    var containerRect = canvasContainer.getBoundingClientRect();
+    var cardMap = { back: '.platform-card-back', mid: '.platform-card-mid', front: '.platform-card-front' };
+    codeDots.forEach(function(dot) {
+      var which = dot.getAttribute('data-card');
+      var card = canvasContainer.querySelector(cardMap[which]);
+      if (!card) return;
+      var cardRect = card.getBoundingClientRect();
+      var centerX = cardRect.left + cardRect.width / 2 - containerRect.left;
+      dot.style.left = centerX + 'px';
+    });
+  }
+
+  function updateCodeDotsVisibility(isExpanded) {
+    codeDots.forEach(function(dot) {
+      var which = dot.getAttribute('data-card');
+      if (isExpanded) {
+        // Only keep the mid (Low-Code) dot visible
+        dot.style.opacity = which === 'mid' ? '1' : '0';
+        dot.style.pointerEvents = which === 'mid' ? '' : 'none';
+      } else {
+        dot.style.opacity = '1';
+        dot.style.pointerEvents = '';
+      }
+    });
+  }
+
+  function entropyResize() {
+    var rect = canvasContainer.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    cachedW = rect.width;
+    cachedH = rect.height;
+  }
+
+  function seedEntropy() {
+    particles = [];
+    var w = cachedW;
+    var h = cachedH;
+    // ~200 particles (like particles.js density) — much cheaper than 700
+    var targetCount = 220;
+    var area = w * h;
+    var spacing = Math.sqrt(area / targetCount);
+    spacing = Math.max(20, Math.min(spacing, 50));
+    var cols = Math.floor(w / spacing);
+    var rows = Math.floor(h / spacing);
+
+    for (var i = 0; i < cols; i++) {
+      for (var j = 0; j < rows; j++) {
+        var x = spacing * i + spacing / 2;
+        var y = spacing * j + spacing / 2;
+        particles.push({
+          x: x, y: y,
+          originalX: x, originalY: y,
+          order: x < w * orderRatio,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          influence: 0
+        });
+      }
+    }
+  }
+
+  // Spatial grid for neighbor lookups
+  var gridCells = {};
+  var gridCellSize = LINK_DIST; // cell = link distance for optimal 1-cell overlap
+
+  function buildGrid() {
+    gridCells = {};
+    var cs = gridCellSize;
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var key = (p.x / cs | 0) + ',' + (p.y / cs | 0);
+      if (!gridCells[key]) gridCells[key] = [];
+      gridCells[key].push(i);
+    }
+  }
+
+  // Pre-built edge list (pairs + squared dist), rebuilt periodically
+  var edges = [];
+
+  function buildEdges() {
+    buildGrid();
+    edges = [];
+    var cs = gridCellSize;
+    var seen = {}; // avoid duplicate edges i<->j
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var cx = p.x / cs | 0;
+      var cy = p.y / cs | 0;
+      for (var dx = -1; dx <= 1; dx++) {
+        for (var dy = -1; dy <= 1; dy++) {
+          var cell = gridCells[(cx + dx) + ',' + (cy + dy)];
+          if (!cell) continue;
+          for (var k = 0; k < cell.length; k++) {
+            var j = cell[k];
+            if (j <= i) continue; // each pair processed once
+            var q = particles[j];
+            var ex = p.x - q.x;
+            var ey = p.y - q.y;
+            var d2 = ex * ex + ey * ey;
+            if (d2 < LINK_DIST_SQ) {
+              edges.push(i, j, d2);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function updateParticles() {
+    var w = cachedW;
+    var h = cachedH;
+    var boundary = w * orderRatio;
+
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+
+      if (p.order) {
+        // Spring back to grid position with chaos influence from nearby chaotic neighbors
+        var dx = p.originalX - p.x;
+        var dy = p.originalY - p.y;
+        p.x += dx * 0.05 * (1 - p.influence);
+        p.y += dy * 0.05 * (1 - p.influence);
+        p.influence *= 0.99;
+      } else {
+        p.vx += (Math.random() - 0.5) * 0.5;
+        p.vy += (Math.random() - 0.5) * 0.5;
+        p.vx *= 0.95;
+        p.vy *= 0.95;
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < boundary || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+        p.x = Math.max(boundary, Math.min(w, p.x));
+        p.y = Math.max(0, Math.min(h, p.y));
+      }
+    }
+
+    // Chaos influence on ordered particles (using edge list, no sqrt)
+    for (var e = 0; e < edges.length; e += 3) {
+      var a = particles[edges[e]];
+      var b = particles[edges[e + 1]];
+      if (a.order && !b.order) {
+        var str = Math.max(0, 1 - Math.sqrt(edges[e + 2]) / INFLUENCE_DIST);
+        a.x += b.vx * str * a.influence;
+        a.y += b.vy * str * a.influence;
+        a.influence = Math.max(a.influence, str);
+      } else if (b.order && !a.order) {
+        var str2 = Math.max(0, 1 - Math.sqrt(edges[e + 2]) / INFLUENCE_DIST);
+        b.x += a.vx * str2 * b.influence;
+        b.y += a.vy * str2 * b.influence;
+        b.influence = Math.max(b.influence, str2);
+      }
+    }
+  }
+
+  function drawEntropy() {
+    entropyFrame = 0; // clear before scheduling next
+    if (!isVisible) return; // stop loop when off-screen
+
+    var w = cachedW;
+    var h = cachedH;
+    ctx.clearRect(0, 0, w, h);
+
+    // Rebuild spatial grid + edges every 20 frames
+    if (entropyTime % 20 === 0) {
+      buildEdges();
+    }
+
+    updateParticles();
+
+    // --- Batch draw all connection lines in one path per opacity bucket ---
+    ctx.lineWidth = 1;
+    // 4 opacity buckets for lines: 0.05, 0.1, 0.15, 0.2
+    var buckets = [null, null, null, null];
+    for (var e = 0; e < edges.length; e += 3) {
+      var d2 = edges[e + 2];
+      var t = 1 - d2 / LINK_DIST_SQ; // 0..1 (closer = higher)
+      var alpha = t * 0.25;
+      var bucket = alpha < 0.06 ? 0 : alpha < 0.12 ? 1 : alpha < 0.18 ? 2 : 3;
+      if (!buckets[bucket]) buckets[bucket] = [];
+      buckets[bucket].push(edges[e], edges[e + 1]);
+    }
+    var bucketAlphas = [0.04, 0.1, 0.16, 0.22];
+    ctx.strokeStyle = '#ffffff';
+    for (var b = 0; b < 4; b++) {
+      if (!buckets[b]) continue;
+      ctx.globalAlpha = bucketAlphas[b];
+      ctx.beginPath();
+      for (var k = 0; k < buckets[b].length; k += 2) {
+        var pa = particles[buckets[b][k]];
+        var pb = particles[buckets[b][k + 1]];
+        ctx.moveTo(pa.x, pa.y);
+        ctx.lineTo(pb.x, pb.y);
+      }
+      ctx.stroke();
+    }
+
+    // --- Batch draw all particle dots in one path ---
+    ctx.globalAlpha = 0.8;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      ctx.moveTo(p.x + 2, p.y);
+      ctx.arc(p.x, p.y, 2, 0, 6.2832); // 2*PI ≈ 6.2832
+    }
+    ctx.fill();
+
+    // Smoothly animate orderRatio toward target
+    orderRatio += (orderRatioTarget - orderRatio) * 0.04;
+
+    // Vertical divider at order/chaos boundary
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 0.5;
+    var bx = w * orderRatio;
+    ctx.beginPath();
+    ctx.moveTo(bx, 0);
+    ctx.lineTo(bx, h);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    entropyTime++;
+    entropyFrame = requestAnimationFrame(drawEntropy);
+  }
+
+  entropyResize();
+  requestAnimationFrame(function() {
+    orderRatio = computeOrderRatio();
+    orderRatioTarget = orderRatio;
+    positionCodeDots();
+    seedEntropy();
+    entropyFrame = requestAnimationFrame(drawEntropy);
+  });
+
+  window.addEventListener('resize', function() {
+    dpr = window.devicePixelRatio || 1;
+    entropyResize();
+    orderRatioTarget = computeOrderRatio();
+    orderRatio = orderRatioTarget;
+    positionCodeDots();
+    seedEntropy();
+    entropyTime = 0;
+  });
+
+  // -- Copilot Studio click → spread cards + flatten + scroll to spectrum-container --
+  var exploreBtn = document.getElementById('exploreCopilotStudio');
+  var csPanel = document.getElementById('copilotStudioPanel');
+  var stackEl = document.querySelector('.platform-stack');
+  var spectrumTarget = document.querySelector('.spectrum-container');
+  var spectrumWrapper = document.getElementById('spectrumRevealWrapper');
+
+  function recalcBoundary() {
+    // Wait for CSS transition to settle, then update target
+    setTimeout(function() {
+      orderRatioTarget = computeOrderRatio();
+      positionCodeDots();
+      // Re-tag particles and redistribute chaotic ones across full zone
+      var w = cachedW;
+      var h = cachedH;
+      var boundary = w * orderRatioTarget;
+      for (var i = 0; i < particles.length; i++) {
+        particles[i].order = particles[i].originalX < boundary;
+        if (!particles[i].order) {
+          particles[i].x = boundary + Math.random() * (w - boundary);
+          particles[i].y = Math.random() * h;
+          particles[i].vx = (Math.random() - 0.5) * 2;
+          particles[i].vy = (Math.random() - 0.5) * 2;
+        }
+      }
+    }, 100);
+  }
+
+  function toggleExpanded() {
+    if (!stackEl) return;
+    var expanding = !stackEl.classList.contains('is-expanded');
+    stackEl.classList.toggle('is-expanded');
+    updateCodeDotsVisibility(expanding);
+    recalcBoundary();
+  }
+
+  function exploreAction() {
+    // Expand cards if not already expanded
+    if (stackEl && !stackEl.classList.contains('is-expanded')) {
+      stackEl.classList.add('is-expanded');
+      updateCodeDotsVisibility(true);
+      recalcBoundary();
+    }
+    // Reveal & animate the spectrum capabilities container below
+    if (spectrumWrapper) {
+      spectrumWrapper.classList.add('is-revealed');
+      // Re-create Lucide icons inside the newly-revealed block
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    if (spectrumTarget) {
+      spectrumTarget.classList.add('spectrum-animated');
+      setTimeout(function() {
+        spectrumTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 400);
+      if (typeof startThreatCycle === 'function') {
+        startThreatCycle();
+      }
+    }
+  }
+
+  if (exploreBtn) {
+    exploreBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      exploreAction();
+    });
+  }
+
+  // Clicking the Copilot Studio card only toggles expanded (spread/collapse)
+  if (csPanel) {
+    csPanel.addEventListener('click', function(e) {
+      if (e.target.closest('.platform-explore-btn')) return;
+      toggleExpanded();
+    });
+  }
 }
 
 /* -------------------------------------------------------

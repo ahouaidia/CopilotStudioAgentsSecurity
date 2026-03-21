@@ -63,6 +63,7 @@
         <span class="text-sm font-semibold tracking-tight text-white">Microsoft</span>
       </a>
       <div class="flex items-center gap-6 nav-links-container nav-links-hero text-xs tracking-wide uppercase">
+        <a href="#spectrum"        class="nav-link hover:text-brand-gold">Spectrum</a>
         <a href="#anatomy"         class="nav-link hover:text-brand-gold">Anatomy</a>
         <a href="#top10-risks"  class="nav-link hover:text-brand-gold">Top 10 Risks</a>
         <a href="#playbook" class="nav-link hover:text-brand-gold">Playbook</a>
@@ -189,26 +190,148 @@
   </section>
 
   <!-- ============================================================
-       SECTION 1 — ANATOMY OF A COPILOT STUDIO AGENT
+       SPECTRUM OF AGENTS — Building Solutions Continuum
        ============================================================ -->
-  <section id="anatomy" class="anatomy-section py-24 bg-brand-black">
-    <div class="max-w-6xl mx-auto px-6">
+  <section id="spectrum" class="py-24 bg-brand-black relative overflow-hidden">
 
-      <!-- Section header -->
+    <div class="max-w-6xl mx-auto px-6 relative z-10">
       <div class="reveal mb-16">
         <div class="section-accent mb-4"></div>
         <h2 class="font-heading text-3xl sm:text-4xl font-bold text-white">
-          Anatomy of a Copilot Studio Agent
+          Spectrum of Agents
         </h2>
         <p class="mt-3 text-sm text-white/50 max-w-xl leading-relaxed">
-          Understanding the building blocks of a Copilot Studio agent is the first step toward securing it. Each component introduces unique capabilities — and potential attack surface.
+          From citizen-built assistants to enterprise-grade autonomous agents — understanding the full continuum of Microsoft's agent-building platforms and their security implications.
         </p>
       </div>
 
-      <!-- Spectrum of Agent Capabilities -->
-      <div class="reveal mb-16">
+      <!-- Full-width entropy canvas with cards overlay -->
+      <div class="reveal">
+        <div class="agents-spectrum" id="agentsSpectrum">
+          <div class="spectrum-canvas-container">
+            <!-- Segmented label line -->
+            <div class="spectrum-segment-line" id="spectrumSegmentLine">
+              <div class="spectrum-segment spectrum-segment-platforms" id="segmentPlatforms">
+                <span class="spectrum-segment-label">Agent Building Platforms</span>
+              </div>
+              <div class="spectrum-segment spectrum-segment-agents" id="segmentAgents">
+                <span class="spectrum-segment-label">Agents</span>
+              </div>
+            </div>
+            <canvas id="agentNetworkCanvas" class="agent-network-canvas"></canvas>
+
+            <!-- Pulsing code-level indicators -->
+            <div class="platform-code-indicators" id="platformCodeIndicators">
+              <div class="platform-code-dot" data-card="back">
+                <span class="platform-code-ping"></span>
+                <span class="platform-code-ring"></span>
+                <span class="platform-code-label">No-Code</span>
+              </div>
+              <div class="platform-code-dot" data-card="mid">
+                <span class="platform-code-ping"></span>
+                <span class="platform-code-ring"></span>
+                <span class="platform-code-label">Low-Code</span>
+              </div>
+              <div class="platform-code-dot" data-card="front">
+                <span class="platform-code-ping"></span>
+                <span class="platform-code-ring"></span>
+                <span class="platform-code-label">Pro-Code</span>
+              </div>
+            </div>
+
+            <!-- Cards positioned on left inside the canvas area -->
+            <div class="platform-stack">
+
+            <!-- Card 1 — Agent Builder (back) -->
+            <div class="platform-card platform-card-back" data-platform="agent-builder">
+              <div class="platform-card-overlay"></div>
+              <div class="platform-card-banner platform-card-banner-orange">
+                <span class="platform-card-banner-title">Agent Builder</span>
+              </div>
+              <div class="platform-card-avatar platform-card-avatar-turquoise">
+                <img src="assets/AgentBuilder.png" alt="Agent Builder" class="platform-card-avatar-img">
+              </div>
+              <div class="platform-card-content">
+                <p class="platform-card-desc">The simplest entry point — create lightweight agents directly within Microsoft 365 Copilot using natural language instructions.</p>
+                <ul class="platform-card-features">
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Natural language configuration</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Pre-built M365 actions</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Zero-code deployment</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> SharePoint knowledge grounding</li>
+                </ul>
+                <p class="platform-card-meta"><i data-lucide="shield" class="w-3 h-3"></i> Platform-managed security</p>
+                <button class="platform-explore-btn platform-explore-btn-turquoise">
+                  <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+                  <span>Explore</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 2 — Copilot Studio (middle) -->
+            <div class="platform-card platform-card-mid" data-platform="copilot-studio" id="copilotStudioPanel">
+              <div class="platform-card-overlay"></div>
+              <div class="platform-card-banner platform-card-banner-teal">
+                <span class="platform-card-banner-title">Copilot Studio</span>
+                <span class="platform-card-focus-star" title="Workshop Focus">
+                  <i data-lucide="bookmark" class="w-6 h-6"></i>
+                </span>
+              </div>
+              <div class="platform-card-avatar platform-card-avatar-blue">
+                <img src="assets/CopilotStudio.png" alt="Copilot Studio" class="platform-card-avatar-img">
+              </div>
+              <div class="platform-card-content">
+                <p class="platform-card-desc">Rich low-code platform for building sophisticated conversational agents with topics, plugins, knowledge sources, and multi-channel deployment.</p>
+                <ul class="platform-card-features">
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Visual topic &amp; dialog builder</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Custom connectors &amp; plugins</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Generative AI orchestration</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Multi-channel publishing</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> DLP &amp; environment policies</li>
+                </ul>
+                <p class="platform-card-meta platform-card-meta-gold"><i data-lucide="shield-alert" class="w-3 h-3"></i> Shared responsibility model</p>
+                <button class="platform-explore-btn" id="exploreCopilotStudio">
+                  <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+                  <span>Explore</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 3 — Azure AI Foundry (front) -->
+            <div class="platform-card platform-card-front" data-platform="azure-foundry">
+              <div class="platform-card-overlay"></div>
+              <div class="platform-card-banner platform-card-banner-bluepurple">
+                <span class="platform-card-banner-title">Azure AI Foundry</span>
+              </div>
+              <div class="platform-card-avatar platform-card-avatar-pink">
+                <img src="assets/Foundry.png" alt="Azure AI Foundry" class="platform-card-avatar-img">
+              </div>
+              <div class="platform-card-content">
+                <p class="platform-card-desc">Enterprise pro-code platform for custom model pipelines, multi-agent systems, RAG architectures, and production autonomous agents.</p>
+                <ul class="platform-card-features">
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Custom model fine-tuning</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Multi-agent orchestration</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> RAG pipeline management</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Evaluation &amp; red-teaming</li>
+                  <li><i data-lucide="check" class="w-3 h-3"></i> Full SDK &amp; API control</li>
+                </ul>
+                <p class="platform-card-meta platform-card-meta-pink"><i data-lucide="shield-off" class="w-3 h-3"></i> Developer-owned security</p>
+                <button class="platform-explore-btn platform-explore-btn-pink">
+                  <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+                  <span>Explore</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          </div><!-- /.spectrum-canvas-container -->
+        </div>
+      </div>
+
+      <!-- Spectrum of Agent Capabilities (revealed on Explore click) -->
+      <div class="spectrum-reveal-wrapper" id="spectrumRevealWrapper">
         <div class="spectrum-container">
-          <h3 class="spectrum-title">Spectrum of Copilot Studio Agent Capabilities</h3>
+          <h3 class="spectrum-title">Spectrum of Copilot Studio Agents</h3>
 
           <!-- Gradient bar + cards -->
           <div class="spectrum-track-wrapper">
@@ -256,6 +379,26 @@
             <span>Agents vary in levels of complexity and capabilities</span>
           </div>
         </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 1 — ANATOMY OF A COPILOT STUDIO AGENT
+       ============================================================ -->
+  <section id="anatomy" class="anatomy-section py-24 bg-brand-black">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <!-- Section header -->
+      <div class="reveal mb-16">
+        <div class="section-accent mb-4"></div>
+        <h2 class="font-heading text-3xl sm:text-4xl font-bold text-white">
+          Anatomy of a Copilot Studio Agent
+        </h2>
+        <p class="mt-3 text-sm text-white/50 max-w-xl leading-relaxed">
+          Understanding the building blocks of a Copilot Studio agent is the first step toward securing it. Each component introduces unique capabilities — and potential attack surface.
+        </p>
       </div>
 
       <!-- Hub-Spoke Architecture Diagram -->
